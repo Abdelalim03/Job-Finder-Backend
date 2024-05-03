@@ -1,39 +1,35 @@
 const { StatusCodes } = require("http-status-codes");
 const prisma = require("../models/prismaClient.js");
 
+const createCategory = async (req, res, next) => {
+  try {
+    const data = req.body;
 
+    const existingCategory = await prisma.category.findUnique({
+      where: {
+        name: data.name,
+      },
+    });
 
-const createCategory = async (req, res, next)=> {
-    try {
-      const data = req.body
-
-      const existingCategory = await prisma.category.findUnique({
-          where: {
-              name: data.name,
-          },
+    if (existingCategory) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        error: "Category with the same name already exists",
       });
-
-      if (existingCategory) {
-          return res.status(StatusCodes.BAD_REQUEST).json({
-              error: 'Category with the same name already exists',
-          });
-      }
-
-
-      const newCategory = await prisma.category.create({
-          data: {
-            name:data.name,
-            description:data.description,
-          },
-        });
-        res.status(StatusCodes.OK).json({
-          "data" : newCategory
-        });        
-    } catch (error) {
-        next(error);
     }
-}
 
+    const newCategory = await prisma.category.create({
+      data: {
+        name: data.name,
+        description: data.description,
+      },
+    });
+    res.status(StatusCodes.OK).json({
+      data: newCategory,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const updateCategory = async (req, res, next) => {
   try {
@@ -48,27 +44,26 @@ const updateCategory = async (req, res, next) => {
 
     if (!existingCategory) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        error: 'Category not found',
+        error: "Category not found",
       });
     }
 
-    if(data.name) {
+    if (data.name) {
       const categoryWithSameName = await prisma.category.findFirst({
         where: {
           name: data.name,
           NOT: {
-            id: categoryId, 
+            id: categoryId,
           },
         },
       });
-  
+
       if (categoryWithSameName) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          error: 'Another category with the same name already exists',
+          error: "Another category with the same name already exists",
         });
       }
     }
-    
 
     const updatedCategory = await prisma.category.update({
       where: {
@@ -88,41 +83,38 @@ const updateCategory = async (req, res, next) => {
   }
 };
 
-
 const deleteCategory = async (req, res, next) => {
   try {
-      const categoryId = parseInt(req.params.id); 
+    const categoryId = parseInt(req.params.id);
 
-      const existingCategory = await prisma.category.findUnique({
-          where: {
-              id: categoryId,
-          },
+    const existingCategory = await prisma.category.findUnique({
+      where: {
+        id: categoryId,
+      },
+    });
+
+    if (!existingCategory) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        error: "Category not found",
       });
+    }
 
-      if (!existingCategory) {
-          return res.status(StatusCodes.NOT_FOUND).json({
-              error: 'Category not found',
-          });
-      }
+    await prisma.category.delete({
+      where: {
+        id: categoryId,
+      },
+    });
 
-      await prisma.category.delete({
-          where: {
-              id: categoryId,
-          },
-      });
-
-      res.status(StatusCodes.OK).json({
-          message: 'Category deleted successfully',
-      });
+    res.status(StatusCodes.OK).json({
+      message: "Category deleted successfully",
+    });
   } catch (error) {
-      next(error);
-  } 
+    next(error);
+  }
 };
 
-
-
-module.exports = { 
-    createCategory,
-    updateCategory,
-    deleteCategory
-}
+module.exports = {
+  createCategory,
+  updateCategory,
+  deleteCategory,
+};
