@@ -37,7 +37,7 @@ const verifyAdmin = (req, res, next) => {
     next();
   } else {
     return res.status(StatusCodes.UNAUTHORIZED).json({
-      error: "Unauthorized, this action require user privileges",
+      error: "Unauthorized, this action require admin privileges",
     });
   }
 };

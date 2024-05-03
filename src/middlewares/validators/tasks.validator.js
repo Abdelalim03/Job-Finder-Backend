@@ -14,7 +14,17 @@ const createTaskRules = [
         .isInt({ min: 1 }).withMessage('categoryId  must be a positive integer')
         .trim(),
 ];
+const updateTaskRules =[
+    body('price')
+        .optional()
+        .isFloat({ min: 0 }).withMessage('price must be a positive number')
+        .trim(),
+    body('categoryId')
+        .optional()
+        .isInt({ min: 1 }).withMessage('categoryId  must be a positive integer')
+        .trim(),
 
+]
 
 const tasksValidator = (req, res, next) => {
     const errors = validationResult(req);
@@ -28,5 +38,6 @@ const tasksValidator = (req, res, next) => {
   
   module.exports = {
     createTaskRules,
+    updateTaskRules,
     tasksValidator,
   };
