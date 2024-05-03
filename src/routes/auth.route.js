@@ -4,6 +4,7 @@ const {
   login,
   register,
   registerClient,
+  loginAdmin,
   registerTasker,
 } = require("../controllers/auth.controller");
 const {
@@ -17,6 +18,8 @@ const authenticateToken = require("../middlewares/auth.middleware.js");
 const { upload } = require("../configs/index.js");
 
 authRouter.route("/login").post(loginRules, authValidator, login);
+authRouter.route("/admin/login").post(loginRules, authValidator, loginAdmin);
+
 authRouter.route("/register").post(registerRules, authValidator, register);
 authRouter
   .route("/register/client")

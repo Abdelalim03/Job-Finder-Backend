@@ -70,6 +70,54 @@ const login = async (req, res, next) => {
   }
 };
 
+const loginAdmin = async (req, res, next) => {
+  try {
+    const adminCred = req.body;
+    if (!adminCred.email || !adminCred.password) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Email and password are required" });
+    }
+
+    const admin = await prisma.admin.findUnique({
+      where: { email: adminCred.email },
+    });
+
+    if (!admin || !(await comparePassword(adminCred.password, admin.password))) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ error: "Invalid email or password" });
+    }
+    
+    const token = jwt.sign(
+      {
+        adminID: admin.id,
+        email: admin.email,
+        role: "admin",
+      },
+      JWT_SECRET,
+      {
+        expiresIn: JWT_EXP,
+      }
+    );
+
+    res.status(StatusCodes.OK).json({
+      admin: {
+        email: admin.email,
+        id: admin.id,
+      },
+      token: token,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+
+
+
 const register = async (req, res, next) => {
   try {
     const userCred = req.body;
@@ -214,5 +262,6 @@ module.exports = {
   hashPassword,
   comparePassword,
   registerClient,
+  loginAdmin,
   registerTasker,
 };

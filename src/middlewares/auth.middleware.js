@@ -69,6 +69,18 @@ const authenticateToken = async (req, res, next) => {
       });
       user.role = "user";
     }
+    else if (decoded.role === "admin") {
+      user = await prisma.admin.findUnique({
+        where: {
+          id: decoded.adminID,
+        },
+        select: {
+          id: true,
+          email: true,
+        },
+      });
+      user.role = "admin";
+    }
 
     if (!user) {
       return res
