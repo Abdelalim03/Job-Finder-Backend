@@ -30,8 +30,4 @@ async function createAdmin(email, password) {
   }
 }
 
-// Usage
-// const email = 'admin@gmail.com';
-// const password = 'Admin123@';
 
-// createAdmin(email, password);
