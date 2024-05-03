@@ -7,6 +7,7 @@ const morgan = require("morgan");
 const prisma = require("./src/models/prismaClient.js");
 const path = require("path");
 const authRouter = require("./src/routes/auth.route.js");
+const categoriesRouter = require("./src/routes/categories.route.js");
 
 // const uploadsPath = path.join(__dirname, UPLOAD_PATH);
 // app.use('/uploads', express.static(uploadsPath));
@@ -33,7 +34,7 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
-
+app.use("/api/categories",categoriesRouter)
 //health check route (used by docker compose)
 app.get("/health", (req, res) => res.send("OK"));
 

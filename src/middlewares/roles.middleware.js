@@ -30,4 +30,15 @@ const verifyUser = (req, res, next) => {
   }
 };
 
-module.exports = { verifyClient, verifyTasker, verifyUser };
+
+const verifyAdmin = (req, res, next) => {
+  if (req.user?.role == "admin") {
+    next();
+  } else {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      error: "Unauthorized, this action require user privileges",
+    });
+  }
+};
+
+module.exports = { verifyClient, verifyTasker, verifyUser,verifyAdmin };
