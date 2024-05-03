@@ -20,9 +20,13 @@ const authenticateToken = async (req, res, next) => {
         },
         select: {
           id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
+          User: {
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
           amount: true,
           description: true,
           profilePicture: true,
@@ -41,9 +45,13 @@ const authenticateToken = async (req, res, next) => {
         },
         select: {
           id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
+          User: {
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       });
       user.role = "client";
