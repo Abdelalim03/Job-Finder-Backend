@@ -10,7 +10,7 @@ const {
   registerRules,
   registerValidator,
   registerTaskerRules,
-} = require("../middlewares/validators/register.validator");
+} = require("../middlewares/validators/auth.validator.js");
 const { verifyUser } = require("../middlewares/roles.middleware.js");
 const authenticateToken = require("../middlewares/auth.middleware.js");
 const { upload } = require("../configs/index.js");
