@@ -7,11 +7,11 @@ generator client {
     provider = "prisma-client-js"
 }
 
-enum Role {
-    admin
-    tasker
-    client
-}
+// enum Role {
+//     admin
+//     tasker
+//     client
+// }
 
 model User {
     id          Int       @id @default(autoincrement())
@@ -20,7 +20,6 @@ model User {
     email       String    @unique
     phoneNumber String
     password    String
-    description String
 
     lastLogin   DateTime?
     createdAt   DateTime  @default(now())
@@ -35,8 +34,9 @@ model User {
 model Tasker {
     userId         Int     @unique
     User           User    @relation(fields: [userId], references: [id])
-    amount      Float
+    amount      Float      @default(0)
     profilePicture String?
+    description String
 
     works         Work[]
     TaskerAddress TaskerAddress[]
@@ -83,9 +83,8 @@ model TaskImage {
 
 model Address {
     id            Int             @id @default(autoincrement())
-    wilaya        String
-    daira         String
-    commune       String
+    wilaya        String          @unique
+    commune       String          @unique
     TaskerAddress TaskerAddress[]
 }
 
@@ -133,6 +132,7 @@ model Message {
     from     Int
     to       Int
     content  String
+    seen     Boolean
     workId   Int
     work     Work   @relation(fields: [workId], references: [id])
     sender   User   @relation("Sender", fields: [from], references: [id])
