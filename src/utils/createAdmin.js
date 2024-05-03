@@ -35,3 +35,18 @@ const email = 'admin@gmail.com';
 const password = 'Admin123@';
 
 createAdmin(email, password);
+
+
+// tasker : 
+//"email":"tasker@gmail.com",
+//"password" : "Tasker123@"
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjEsImVtYWlsIjoidGFza2VyQGdtYWlsLmNvbSIsInJvbGUiOiJ0YXNrZXIiLCJpYXQiOjE3MTQ3NjE5MDcsImV4cCI6MTcxNzM1MzkwN30.ULSPmxAScboOZrbAwllJ55sl8aJWzYz9g6Yy1CRmb2c
+
+
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjEsImVtYWlsIjoidGFza2VyQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzE0NzYxNjI5LCJleHAiOjE3MTczNTM2Mjl9.VrPOAav2W34TdNH1xUgNz17XZtBElCxsV2TFDD8jldA
+
+
+
+
+// admin Token : 
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklEIjozLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxNDc1NjI4NSwiZXhwIjoxNzE3MzQ4Mjg1fQ.jRojdz5mJFj_872lgh3P9iz8Xw5DnD296C1otIzjkYc

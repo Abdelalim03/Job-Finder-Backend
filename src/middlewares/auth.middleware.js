@@ -16,19 +16,13 @@ const authenticateToken = async (req, res, next) => {
     if (decoded.role === "tasker") {
       user = await prisma.tasker.findUnique({
         where: {
-          id: decoded.userID,
+          userId: decoded.userID,
         },
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          amount: true,
-          description: true,
-          profilePicture: true,
+        include: {
+          User: true,
           Task: {
             select: {
-              _count,
+              _count: true,
             },
           },
         },
@@ -39,12 +33,9 @@ const authenticateToken = async (req, res, next) => {
         where: {
           id: decoded.userID,
         },
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-        },
+        include: {
+          User: true,
+        }
       });
       user.role = "client";
     } else if (decoded.role === "user") {
@@ -79,7 +70,6 @@ const authenticateToken = async (req, res, next) => {
         .status(StatusCodes.UNAUTHORIZED)
         .json({ error: "Unauthorized" });
     }
-
     req.user = user;
 
     next();
