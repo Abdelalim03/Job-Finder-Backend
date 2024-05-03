@@ -8,15 +8,16 @@ const {
 } = require("../controllers/auth.controller");
 const {
   registerRules,
-  registerValidator,
+  authValidator,
   registerTaskerRules,
+  loginRules,
 } = require("../middlewares/validators/auth.validator.js");
 const { verifyUser } = require("../middlewares/roles.middleware.js");
 const authenticateToken = require("../middlewares/auth.middleware.js");
 const { upload } = require("../configs/index.js");
 
-authRouter.route("/login").post(login);
-authRouter.route("/register").post(registerRules, registerValidator, register);
+authRouter.route("/login").post(loginRules, authValidator, login);
+authRouter.route("/register").post(registerRules, authValidator, register);
 authRouter
   .route("/register/client")
   .post(authenticateToken, verifyUser, registerClient);
@@ -28,7 +29,7 @@ authRouter
     verifyUser,
     upload.single("profilePicture"),
     registerTaskerRules,
-    registerValidator,
+    authValidator,
     registerTasker
   );
 

@@ -59,15 +59,7 @@ const loginRules = [
     .withMessage("Email is required")
     .trim()
     .isEmail()
-    .withMessage("Email is invalid")
-    .normalizeEmail()
-    .custom(async (email) => {
-      const user = await prisma.user.findUnique({ where: { email } });
-      if (user) {
-        return Promise.reject("Email already in use");
-      }
-    }),
-
+    .withMessage("Email is invalid"),
   body("password")
     .notEmpty()
     .withMessage("Password is required")
@@ -96,7 +88,7 @@ const registerTaskerRules = [
   //         commune: address.commune
   //       }
   //     });
-      
+
   //     // If address does not exist, throw an error
   //     if (!existingAddress) {
   //       throw new Error(`Address ${address.wilaya}, ${address.commune} does not exist`);
@@ -126,7 +118,7 @@ const registerTaskerRules = [
 //       }
 //     }),
 // ];
-const registerValidator = (req, res, next) => {
+const authValidator = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res
@@ -141,5 +133,5 @@ module.exports = {
   // updateRules,
   loginRules,
   registerTaskerRules,
-  registerValidator,
+  authValidator,
 };
