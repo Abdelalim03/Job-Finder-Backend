@@ -53,13 +53,50 @@ const registerRules = [
     }),
 ];
 
+const loginRules = [
+  body("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .trim()
+    .isEmail()
+    .withMessage("Email is invalid"),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .trim()
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters")
+    .matches(/^(?=.*[A-Z])[ -~]*$/)
+    .withMessage(
+      "Password must contain at least one uppercase letter and can contain only printable characters"
+    ),
+];
+
 const registerTaskerRules = [
   body("description").notEmpty().withMessage("Description is required").trim(),
   // body("addresses")
   //   .notEmpty()
-  //   .withMessage("addresses are required")
-  //   .trim()
+  //   .withMessage("Addresses are required")
   //   .isArray({ min: 1 }),
+  // body("addresses.*").custom(async (value, { req }) => {
+  //   // Iterate over each address in addresses array
+  //   for (const address of req.body.addresses) {
+  //     // Check if address exists in the database
+  //     const existingAddress = await prisma.address.findUnique({
+  //       where: {
+  //         wilaya: address.wilaya,
+  //         commune: address.commune
+  //       }
+  //     });
+
+  //     // If address does not exist, throw an error
+  //     if (!existingAddress) {
+  //       throw new Error(`Address ${address.wilaya}, ${address.commune} does not exist`);
+  //     }
+  //   }
+  //   // If all addresses exist, return true
+  //   return true;
+  // })
 ];
 
 // const updateRules = [
@@ -68,24 +105,20 @@ const registerTaskerRules = [
 //     .trim()
 //     .isLength({ min: 6 })
 //     .withMessage('Password must be at least 6 characters'),
-//   body('username')
+//   body('email')
 //     .optional()
 //     .trim()
-//     .isLength({ min: 3, max: 20 })
-//     .withMessage('Username must be between 3 and 20 characters')
-//     .matches(/^[A-Za-z0-9]+$/)
-//     .withMessage('Username must only include alphanumeric characters')
-//     .custom(async (username, { req }) => {
-//       if (username === req.user.username) {
+//     .custom(async (email, { req }) => {
+//       if (email === req.user.email) {
 //         return;
 //       }
-//       const user = await prisma.user.findUnique({ where: { username } });
+//       const user = await prisma.user.findUnique({ where: { email } });
 //       if (user) {
-//         return Promise.reject('Username already in use');
+//         return Promise.reject('Email already in use');
 //       }
 //     }),
 // ];
-const registerValidator = (req, res, next) => {
+const authValidator = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res
@@ -98,6 +131,7 @@ const registerValidator = (req, res, next) => {
 module.exports = {
   registerRules,
   // updateRules,
+  loginRules,
   registerTaskerRules,
-  registerValidator,
+  authValidator,
 };
