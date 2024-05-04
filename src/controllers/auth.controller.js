@@ -168,8 +168,8 @@ const registerClient = async (req, res, next) => {
 
     const token = jwt.sign(
       {
-        userID: user.id,
-        email: user.email,
+        userID: client.id,
+        email: client.email,
         role: "client",
       },
       JWT_SECRET,

@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs").promises;
 
-const { PICS_FOLDER, UPLOAD_PATH } = require("../configs/index.js");
+const { PICS_FOLDER, UPLOAD_PATH, Task_IMG_FOLDER } = require("../configs/index.js");
 
 const removeProfilePicture = async (picture) => {
   try {
@@ -25,4 +25,9 @@ const setProfilePictureUrl = (user) => {
     "/" + UPLOAD_PATH + PICS_FOLDER + encodeURIComponent(user.profilePicture));
 };
 
-module.exports = { setProfilePictureUrl, removeProfilePicture };
+const setTaskImageUrl = (image) => {
+  return (
+    "/" + UPLOAD_PATH + Task_IMG_FOLDER + encodeURIComponent(image));
+};
+
+module.exports = { setProfilePictureUrl, removeProfilePicture,setTaskImageUrl };
