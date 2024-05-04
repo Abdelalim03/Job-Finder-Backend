@@ -70,10 +70,7 @@ const updateReview = async (req, res, next) => {
 
 const deleteReview = async (req, res, next) => {
   try {
-    const reviewId = parseInt(req.params.id);
-    if (review.userId !== req.user.userId || req.user.role !== "admin") {
-      return Promise.reject("challenge Name already in use");
-    }
+    
     await prisma.review.delete({
       where: {
         id: reviewId,

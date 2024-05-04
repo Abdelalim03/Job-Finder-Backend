@@ -1,7 +1,11 @@
 const path = require("path");
 const fs = require("fs").promises;
 
-const { PICS_FOLDER, UPLOAD_PATH, Task_IMG_FOLDER } = require("../configs/index.js");
+const {
+  PICS_FOLDER,
+  UPLOAD_PATH,
+  Task_IMG_FOLDER,
+} = require("../configs/index.js");
 
 const removeProfilePicture = async (picture) => {
   try {
@@ -26,8 +30,28 @@ const setProfilePictureUrl = (user) => {
 };
 
 const setTaskImageUrl = (image) => {
-  return (
-    "/" + UPLOAD_PATH + Task_IMG_FOLDER + encodeURIComponent(image));
+  return "/" + UPLOAD_PATH + Task_IMG_FOLDER + encodeURIComponent(image);
 };
 
-module.exports = { setProfilePictureUrl, removeProfilePicture,setTaskImageUrl };
+const removeTaskImage = async (image) => {
+  try {
+    const filePath = path.join(
+      __dirname,
+      "..",
+      "..",
+      UPLOAD_PATH,
+      Task_IMG_FOLDER,
+      image
+    );
+    await fs.unlink(filePath);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = {
+  setProfilePictureUrl,
+  removeProfilePicture,
+  setTaskImageUrl,
+  removeTaskImage
+};
