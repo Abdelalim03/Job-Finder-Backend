@@ -3,7 +3,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "DUMMY_KEY";
 const JWT_EXP = Number(process.env.JWT_EXP) || 2592000;
 const UPLOAD_PATH = process.env.UPLOAD_PATH || "uploads/";
 const PICS_FOLDER = process.env.PICS_FOLDER || "pictures/";
-const Task_IMG_FOLDER = process.env.PICS_FOLDER || "taskImages/";
+const Task_IMG_FOLDER = process.env.Task_IMG_FOLDER || "taskImages/";
 
 const fs = require("fs");
 const multer = require("multer");
