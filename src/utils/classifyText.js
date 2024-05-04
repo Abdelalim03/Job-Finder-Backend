@@ -21,7 +21,7 @@ async function classifyText(text) {
       return true;
     } else {
       // Add to database etc.
-      return fa;
+      return false;
     }
   } catch (error) {
     next(error);

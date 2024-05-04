@@ -11,7 +11,7 @@ const verifyClient = (req, res, next) => {
 };
 
 const verifyTasker = (req, res, next) => {
-  console.log(req.user?.role );
+  console.log(req.user?.role);
   if (req.user?.role == "tasker") {
     next();
   } else {
@@ -31,7 +31,6 @@ const verifyUser = (req, res, next) => {
   }
 };
 
-
 const verifyAdmin = (req, res, next) => {
   if (req.user?.role == "admin") {
     next();
@@ -42,4 +41,24 @@ const verifyAdmin = (req, res, next) => {
   }
 };
 
-module.exports = { verifyClient, verifyTasker, verifyUser,verifyAdmin };
+function authRoles(roles) {
+  try {
+    if (roles.includes(req.user?.role)) {
+      next();
+    } else {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        error: "Unauthorized, this action require admin privileges",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = {
+  verifyClient,
+  verifyTasker,
+  verifyUser,
+  verifyAdmin,
+  authRoles,
+};

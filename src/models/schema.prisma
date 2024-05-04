@@ -77,7 +77,7 @@ model Task {
 model TaskImage {
     id     Int    @id @default(autoincrement())
     url    String
-    task   Task   @relation(fields: [taskId], references: [id])
+    task   Task   @relation(fields: [taskId], references: [id],onDelete: Cascade)
     taskId Int
 }
 

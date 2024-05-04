@@ -83,12 +83,15 @@ const loginAdmin = async (req, res, next) => {
       where: { email: adminCred.email },
     });
 
-    if (!admin || !(await comparePassword(adminCred.password, admin.password))) {
+    if (
+      !admin ||
+      !(await comparePassword(adminCred.password, admin.password))
+    ) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json({ error: "Invalid email or password" });
     }
-    
+
     const token = jwt.sign(
       {
         adminID: admin.id,
@@ -112,11 +115,6 @@ const loginAdmin = async (req, res, next) => {
     next(error);
   }
 };
-
-
-
-
-
 
 const register = async (req, res, next) => {
   try {
@@ -192,6 +190,8 @@ const registerClient = async (req, res, next) => {
 
 const registerTasker = async (req, res, next) => {
   try {
+    const t = await prisma.$transaction();
+
     const taskerInfos = req.body;
 
     if (req.file) {
@@ -204,7 +204,7 @@ const registerTasker = async (req, res, next) => {
       }
     }
 
-    const tasker = await prisma.tasker.create({
+    const tasker = await t.tasker.create({
       data: {
         userId: req.user.id,
         description: taskerInfos.description,
@@ -215,7 +215,7 @@ const registerTasker = async (req, res, next) => {
 
     for (let index = 0; index < taskerInfos?.addresses?.length; index++) {
       const address = taskerInfos?.addresses[index];
-      let addresses = await prisma.address.findMany({
+      let addresses = await t.address.findMany({
         where: {
           wilaya: address["wilaya"],
           commune: address["commune"],
@@ -227,7 +227,7 @@ const registerTasker = async (req, res, next) => {
         taskerId: tasker.userId,
       }));
 
-      await prisma.taskerAddress.createMany({
+      await t.taskerAddress.createMany({
         data: payload,
       });
     }
@@ -243,6 +243,7 @@ const registerTasker = async (req, res, next) => {
         expiresIn: JWT_EXP,
       }
     );
+    await t.commit();
 
     res.status(StatusCodes.OK).json({
       user: {
@@ -252,6 +253,7 @@ const registerTasker = async (req, res, next) => {
       },
     });
   } catch (error) {
+    await t.$rollback();
     next(error);
   }
 };
