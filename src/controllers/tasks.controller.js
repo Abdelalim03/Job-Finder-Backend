@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const prisma = require("../models/prismaClient.js");
-const { setTaskImageUrl } = require("../utils/managePictures.js");
+const { setTaskImageUrl, removeTaskImage } = require("../utils/managePictures.js");
 
 const createTask = async (req, res, next) => {
   uploadedImages = [];
@@ -71,6 +71,9 @@ const deleteTask = async (req, res, next) => {
       select: {
         taskerId: true,
       },
+      include: {
+        taskImages: true,
+      }
     });
 
     if (!existingTask) {
@@ -86,11 +89,19 @@ const deleteTask = async (req, res, next) => {
       });
     }
 
+    const taskImages = existingTask.taskImages
     await prisma.task.delete({
       where: {
         id: taskId,
       },
     });
+
+    for (const image of taskImages) {
+        print(image)
+        removeTaskImage(image.url)
+    }
+
+
 
     res.status(StatusCodes.OK).json({
       message: "Task deleted successfully.",

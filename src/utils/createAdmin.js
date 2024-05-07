@@ -30,4 +30,3 @@ async function createAdmin(email, password) {
   }
 }
 
-

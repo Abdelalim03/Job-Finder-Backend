@@ -189,8 +189,11 @@ const registerClient = async (req, res, next) => {
 };
 
 const registerTasker = async (req, res, next) => {
+  let t;
+
   try {
-    const t = await prisma.$transaction();
+
+    t = await prisma.$transaction();
 
     const taskerInfos = req.body;
 
@@ -213,8 +216,7 @@ const registerTasker = async (req, res, next) => {
     });
     taskerInfos.addresses = [{ wilaya: "Setif" }];
 
-    for (let index = 0; index < taskerInfos?.addresses?.length; index++) {
-      const address = taskerInfos?.addresses[index];
+    for (const address of taskerInfos?.addresses) {
       let addresses = await t.address.findMany({
         where: {
           wilaya: address["wilaya"],
@@ -243,7 +245,8 @@ const registerTasker = async (req, res, next) => {
         expiresIn: JWT_EXP,
       }
     );
-    await t.commit();
+
+    await t.commit(); 
 
     res.status(StatusCodes.OK).json({
       user: {
@@ -253,7 +256,7 @@ const registerTasker = async (req, res, next) => {
       },
     });
   } catch (error) {
-    await t.$rollback();
+    if (t) await t.$rollback(); 
     next(error);
   }
 };
