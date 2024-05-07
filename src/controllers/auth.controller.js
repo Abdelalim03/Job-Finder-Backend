@@ -189,8 +189,9 @@ const registerClient = async (req, res, next) => {
 };
 
 const registerTasker = async (req, res, next) => {
+  // let t;
   try {
-    const t = await prisma.$transaction();
+    // t = await prisma.$transaction();
 
     const taskerInfos = req.body;
 
@@ -204,7 +205,7 @@ const registerTasker = async (req, res, next) => {
       }
     }
 
-    const tasker = await t.tasker.create({
+    const tasker = await prisma.tasker.create({
       data: {
         userId: req.user.id,
         description: taskerInfos.description,
@@ -215,7 +216,7 @@ const registerTasker = async (req, res, next) => {
 
     for (let index = 0; index < taskerInfos?.addresses?.length; index++) {
       const address = taskerInfos?.addresses[index];
-      let addresses = await t.address.findMany({
+      let addresses = await prisma.address.findMany({
         where: {
           wilaya: address["wilaya"],
           commune: address["commune"],
@@ -227,7 +228,7 @@ const registerTasker = async (req, res, next) => {
         taskerId: tasker.userId,
       }));
 
-      await t.taskerAddress.createMany({
+      await prisma.taskerAddress.createMany({
         data: payload,
       });
     }
@@ -243,7 +244,7 @@ const registerTasker = async (req, res, next) => {
         expiresIn: JWT_EXP,
       }
     );
-    await t.commit();
+    // await t.commit();
 
     res.status(StatusCodes.OK).json({
       user: {
@@ -253,7 +254,7 @@ const registerTasker = async (req, res, next) => {
       },
     });
   } catch (error) {
-    await t.$rollback();
+    // await t.$rollback();
     next(error);
   }
 };
