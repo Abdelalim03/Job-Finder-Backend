@@ -95,7 +95,6 @@ const deleteTask = async (req, res, next) => {
     });
 
     for (const image of taskImages) {
-      console.log(image.url);
         await removeTaskImage(image.url)
     }
 
@@ -120,7 +119,7 @@ const updateTask = async (req, res, next) => {
     if (files?.length > 0) {
       for (const file of files) {
         if (file.mimetype.startsWith("image/")) {
-          const url = setTaskImageUrl(file.filename);
+          const url = file.filename;
           uploadedImages.push(url);
         } else {
           return res
