@@ -73,7 +73,16 @@ const loginRules = [
 ];
 
 const registerTaskerRules = [
-  body("description").notEmpty().withMessage("Description is required").trim(),
+  body("description")
+    .notEmpty()
+    .withMessage("Description is required")
+    .trim()
+    .custom(async (email) => {
+      const user = await prisma.tasker.findUnique({ where: { email } });
+      if (user) {
+        return Promise.reject("Email already in use");
+      }
+    }),
   // body("addresses")
   //   .notEmpty()
   //   .withMessage("Addresses are required")
@@ -97,6 +106,15 @@ const registerTaskerRules = [
   //   // If all addresses exist, return true
   //   return true;
   // })
+];
+
+const registerClientRules = [
+  custom(async (email) => {
+    const user = await prisma.client.findUnique({ where: { email } });
+    if (user) {
+      return Promise.reject("Email already in use");
+    }
+  }),
 ];
 
 // const updateRules = [
@@ -132,6 +150,7 @@ module.exports = {
   registerRules,
   // updateRules,
   loginRules,
+  registerClientRules,
   registerTaskerRules,
   authValidator,
 };

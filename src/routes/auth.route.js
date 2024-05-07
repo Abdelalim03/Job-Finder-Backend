@@ -12,6 +12,7 @@ const {
   authValidator,
   registerTaskerRules,
   loginRules,
+  registerClientRules,
 } = require("../middlewares/validators/auth.validator.js");
 const { verifyUser, authRoles } = require("../middlewares/roles.middleware.js");
 const authenticateToken = require("../middlewares/auth.middleware.js");
@@ -23,7 +24,13 @@ authRouter.route("/admin/login").post(loginRules, authValidator, loginAdmin);
 authRouter.route("/register").post(registerRules, authValidator, register);
 authRouter
   .route("/register/client")
-  .post(authenticateToken, authRoles(["user"]), registerClient);
+  .post(
+    authenticateToken,
+    authRoles(["user"]),
+    registerClientRules,
+    authValidator,
+    registerClient
+  );
 
 authRouter
   .route("/register/tasker")
