@@ -3,9 +3,9 @@ const authRouter = express.Router();
 const {
   login,
   register,
-  registerClient,
   loginAdmin,
   registerTasker,
+  registerClient,
 } = require("../controllers/auth.controller");
 const {
   registerRules,

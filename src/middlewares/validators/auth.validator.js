@@ -1,4 +1,4 @@
-const { body, validationResult } = require("express-validator");
+const { body, validationResult, custom } = require("express-validator");
 const { StatusCodes } = require("http-status-codes");
 const prisma = require("../../models/prismaClient");
 
@@ -73,7 +73,10 @@ const loginRules = [
 ];
 
 const registerTaskerRules = [
-  body("description").notEmpty().withMessage("Description is required").trim(),
+  body("description")
+    .notEmpty()
+    .withMessage("Description is required")
+    .trim()
   // body("addresses")
   //   .notEmpty()
   //   .withMessage("Addresses are required")
@@ -98,6 +101,7 @@ const registerTaskerRules = [
   //   return true;
   // })
 ];
+
 
 // const updateRules = [
 //   body('newPassword')
