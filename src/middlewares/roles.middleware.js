@@ -41,16 +41,23 @@ const verifyAdmin = (req, res, next) => {
   }
 };
 
-// function authRoles(roles) {
-//     if (roles.includes(req.user?.role)) {
-//       next();
-//     } else {
-//       return res.status(StatusCodes.UNAUTHORIZED).json({
-//         error: "Unauthorized, this action require admin privileges",
-//       });
-//     }
-  
-// }
+
+function authRoles(roles) {
+  return  (req, res, next)=> {
+
+  try {
+    if (roles.includes(req.user?.role)) {
+      next();
+    } else {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        error: "Unauthorized, this action require admin privileges",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+}
 
 module.exports = {
   verifyClient,
