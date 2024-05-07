@@ -41,7 +41,10 @@ const verifyAdmin = (req, res, next) => {
   }
 };
 
+
 function authRoles(roles) {
+  return  (req, res, next)=> {
+
   try {
     if (roles.includes(req.user?.role)) {
       next();
@@ -53,6 +56,7 @@ function authRoles(roles) {
   } catch (error) {
     next(error);
   }
+}
 }
 
 module.exports = {
