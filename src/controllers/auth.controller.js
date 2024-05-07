@@ -158,6 +158,16 @@ const register = async (req, res, next) => {
 
 const registerClient = async (req, res, next) => {
   try {
+    const user = await prisma.client.findUnique({
+      where: { userId: req.user?.id },
+    });
+    
+    if (user) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Email already in use." });
+    }
+
     const client = await prisma.client.create({
       data: {
         userId: req.user.id,
@@ -189,9 +199,16 @@ const registerClient = async (req, res, next) => {
 };
 
 const registerTasker = async (req, res, next) => {
-  // let t;
   try {
-    // t = await prisma.$transaction();
+    const user = await prisma.tasker.findUnique({
+      where: { userId: req.user?.id },
+    });
+
+    if (user) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Email already in use." });
+    }
 
     const taskerInfos = req.body;
 
@@ -244,7 +261,6 @@ const registerTasker = async (req, res, next) => {
         expiresIn: JWT_EXP,
       }
     );
-    // await t.commit();
 
     res.status(StatusCodes.OK).json({
       user: {
@@ -254,7 +270,6 @@ const registerTasker = async (req, res, next) => {
       },
     });
   } catch (error) {
-    // await t.$rollback();
     next(error);
   }
 };
