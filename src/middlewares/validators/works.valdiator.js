@@ -14,6 +14,10 @@ const messageRules = [
     
 ];
 
+const updateWorkRules = [
+  body("status").notEmpty().withMessage("status is required").trim(),
+
+]
 
 const workValidator = (req, res, next) => {
     const errors = validationResult(req);
@@ -28,4 +32,5 @@ const workValidator = (req, res, next) => {
   module.exports = {
     messageRules,
     workValidator,
+    updateWorkRules
   };

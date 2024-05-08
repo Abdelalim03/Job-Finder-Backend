@@ -71,9 +71,12 @@ async function updateWork(req, res) {
 
         const existingWork = await prisma.work.findUnique({
             where: { id: workId },
-            include: {
-                messages: true,
-                client: true,
+            select: {
+                id: true,
+                status : true,
+                clientId : true,
+                taskerId : true,
+                Message: true,
             },
         });
 
@@ -82,21 +85,45 @@ async function updateWork(req, res) {
             return res.status(404).json({ error: "Work not found" });
         }
 
-        // Check if the requested status transition is valid
+        console.log(existingWork);
+
+        // Change the status from created to started 
+
         if (existingWork.status === "created" && status === "started") {
-            // Verify that the user is a client
             if (req.user.role !== "client" || req.user.userId !== existingWork.clientId) {
-                return res.status(403).json({ error: "You must be a client to start the work" });
+                return res.status(403).json({ error: "You must be a client of this work to start the work" });
             }
             // Verify that the tasker has sent at least one message
-            if (existingWork.messages.length === 0) {
+            
+            if (! (existingWork.Message.find(element => element.from === existingWork.taskerId)) ) {
                 return res.status(400).json({ error: "The tasker must send at least one message before starting the work" });
             }
         }
         else if(existingWork.status === "started" && status === "canceled"){
-            
-        }
+            if( !(req.user.userId === existingWork.clientId) && !(req.user.userId === existingWork.taskerId))
+            {
+                return res.status(403).json({ error: "You must belong to this work to cancled the work" });
+            }
 
+        }
+        else if(existingWork.status === "started" && status === "finished")
+        {
+            if( !(req.user.userId === existingWork.taskerId) )
+            {
+                return res.status(403).json({ error: "You must be the tasker to update this work" });
+            }
+        }
+        else if(existingWork.status === "finished" && (status === "approved" || status === "canceled"))
+        {
+            if( !(req.user.userId === existingWork.clientId) )
+            {
+                return res.status(403).json({ error: "You must be the Client to update this work" });
+            }
+        }
+        else {
+            return res.status(403).json({ error: "Invalid Update " });
+
+        }
         const updatedWork = await prisma.work.update({
             where: { id: workId },
             data: {
