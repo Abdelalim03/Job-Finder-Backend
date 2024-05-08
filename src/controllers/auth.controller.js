@@ -176,7 +176,7 @@ const registerClient = async (req, res, next) => {
 
     const token = jwt.sign(
       {
-        userID: client.id,
+        userID: client.userId,
         email: client.email,
         role: "client",
       },

@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const prisma = require("../models/prismaClient.js");
-const { setTaskImageUrl } = require("../utils/managePictures.js");
+const { setTaskImageUrl, removeTaskImage } = require("../utils/managePictures.js");
 
 const createTask = async (req, res, next) => {
   uploadedImages = [];
@@ -9,7 +9,7 @@ const createTask = async (req, res, next) => {
   if (files?.length > 0) {
     for (const file of files) {
       if (file.mimetype.startsWith("image/")) {
-        const url = setTaskImageUrl(file.filename);
+        const url = file.filename;
         uploadedImages.push(url);
       } else {
         return res
@@ -70,6 +70,7 @@ const deleteTask = async (req, res, next) => {
       },
       select: {
         taskerId: true,
+        taskImages: true,
       },
     });
 
@@ -86,11 +87,18 @@ const deleteTask = async (req, res, next) => {
       });
     }
 
+    const taskImages = existingTask.taskImages
     await prisma.task.delete({
       where: {
         id: taskId,
       },
     });
+
+    for (const image of taskImages) {
+        await removeTaskImage(image.url)
+    }
+
+
 
     res.status(StatusCodes.OK).json({
       message: "Task deleted successfully.",
@@ -105,6 +113,22 @@ const updateTask = async (req, res, next) => {
     const taskId = parseInt(req.params.id);
     const { description, price, categoryId } = req.body;
     const userId = req.user.userId;
+    uploadedImages = [];
+    const files = req.files;
+  
+    if (files?.length > 0) {
+      for (const file of files) {
+        if (file.mimetype.startsWith("image/")) {
+          const url = file.filename;
+          uploadedImages.push(url);
+        } else {
+          return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ error: "Invalid file type. Only images are allowed." });
+        }
+      }
+    }
+
 
     const existingTask = await prisma.task.findUnique({
       where: {
@@ -112,6 +136,7 @@ const updateTask = async (req, res, next) => {
       },
       select: {
         taskerId: true,
+        taskImages : true
       },
     });
 
@@ -151,8 +176,20 @@ const updateTask = async (req, res, next) => {
         description: description,
         price: price_task,
         categoryId: categoryId_task,
+        taskImages: {
+          deleteMany: {}, 
+          create: uploadedImages.map((image) => ({
+            url: image,
+          })),
+        },
       },
     });
+
+    for (const imageUrl of existingTask.taskImages) {
+      console.log(imageUrl.url);
+      const filename = imageUrl.url;
+      await removeTaskImage(filename)
+    }
 
     res.status(StatusCodes.OK).json({
       data: updatedTask,

@@ -31,7 +31,7 @@ const authenticateToken = async (req, res, next) => {
     } else if (decoded.role === "client") {
       user = await prisma.client.findUnique({
         where: {
-          id: decoded.userID,
+          userId: decoded.userID,
         },
         include: {
           User: true,

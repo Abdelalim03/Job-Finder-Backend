@@ -9,6 +9,7 @@ const path = require("path");
 const authRouter = require("./src/routes/auth.route.js");
 const categoriesRouter = require("./src/routes/categories.route.js");
 const tasksRouter = require("./src/routes/tasks.route.js");
+const worksRouter = require("./src/routes/works.route.js");
 
 // const uploadsPath = path.join(__dirname, UPLOAD_PATH);
 // app.use('/uploads', express.static(uploadsPath));
@@ -37,6 +38,7 @@ app.get("/", async (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/categories",categoriesRouter)
 app.use("/api/tasks",tasksRouter)
+app.use("/api/works",worksRouter)
 
 
 //health check route (used by docker compose)

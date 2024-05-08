@@ -14,9 +14,9 @@ const { categoriesValidator, createCategoryRules } = require("../middlewares/val
 const authenticateToken = require("../middlewares/auth.middleware.js");
 
 // categoriesRouter.route("/create").post(authenticateToken, verifyAdmin,createCategory)
-categoriesRouter.route("/create").post(authenticateToken, verifyAdmin,createCategoryRules,categoriesValidator,createCategory)
-categoriesRouter.route("/update/:id").put(authenticateToken, verifyAdmin,updateCategory)
-categoriesRouter.route("/delete/:id").delete(authenticateToken, verifyAdmin,deleteCategory)
+categoriesRouter.route("/").post(authenticateToken, verifyAdmin,createCategoryRules,categoriesValidator,createCategory)
+categoriesRouter.route("/:id").put(authenticateToken, verifyAdmin,updateCategory)
+categoriesRouter.route("/:id").delete(authenticateToken, verifyAdmin,deleteCategory)
 
 
 module.exports = categoriesRouter;

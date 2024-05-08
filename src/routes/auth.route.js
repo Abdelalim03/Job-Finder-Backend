@@ -23,13 +23,13 @@ authRouter.route("/admin/login").post(loginRules, authValidator, loginAdmin);
 authRouter.route("/register").post(registerRules, authValidator, register);
 authRouter
   .route("/register/client")
-  .post(authenticateToken, authRoles(["user"]), registerClient);
+  .post(authenticateToken, verifyUser, registerClient);
 
 authRouter
   .route("/register/tasker")
   .post(
     authenticateToken,
-    authRoles(["user"]),
+    verifyUser,
     upload.single("profilePicture"),
     registerTaskerRules,
     authValidator,
