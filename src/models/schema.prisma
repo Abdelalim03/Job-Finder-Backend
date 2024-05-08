@@ -154,4 +154,5 @@ enum Status {
     started
     canceled
     finished
+    approved
 }
