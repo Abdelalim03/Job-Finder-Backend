@@ -2,32 +2,44 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function sendMessage(req, res) {
-    const { workId, destinationUserId, content } = req.body;
-
+    const { workId, destinationUserId, content ,categoryId} = req.body;
     try {
         if (workId) {
-            const message = await prisma.message.create({
-                data: {
-                    from: req.user.id,
-                    to: destinationUserId,
-                    content: content,
-                    seen: false,
-                    workId: workId,
+            const existingWork = await prisma.work.findUnique({
+                where: {
+                    id: workId,
                 },
             });
-            return res.status(200).json({ message: "Message sent successfully", data: message });
+
+            if (existingWork) {
+                const message = await prisma.message.create({
+                    data: {
+                        from: req.user.userId,
+                        to: parseInt(destinationUserId),
+                        content: content,
+                        seen: false,
+                        workId: workId,
+                    },
+                });
+                return res.status(200).json({ message: "Message sent successfully", data: message });
+            } else {
+                return res.status(404).json({ error: "Work not found with the provided ID" });
+            }
         } else {
+            let clientId =  (req.user.role == "client" ) ? req.user.userId : parseInt(destinationUserId)
+            let taskerId = (req.user.role === "tasker") ? req.user.userId : parseInt(destinationUserId)
             const newWork = await prisma.work.create({
                 data: {
-                    clientId: req.user.id,
-                    taskerId: destinationUserId,
+                    clientId: clientId,
+                    taskerId:  taskerId,
+                    categoryId : parseInt(categoryId)
                 },
             });
 
             const message = await prisma.message.create({
                 data: {
-                    from: req.user.id,
-                    to: destinationUserId,
+                    from: req.user.userId,
+                    to: parseInt(destinationUserId),
                     content: content,
                     seen: false,
                     workId: newWork.id,
