@@ -90,7 +90,7 @@ async function deleteWork(req, res) {
   }
 }
 
-async function createWorkReview(req, res) {
+async function createWorkReview(req, res, next) {
   const { workId, rating, comment } = req.body;
 
   try {
@@ -126,14 +126,11 @@ async function createWorkReview(req, res) {
 
     return res.status(StatusCodes.CREATED).json(newWorkReview);
   } catch (error) {
-    console.error("Error creating work review:", error);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Internal server error" });
+    next(error)
   }
 }
 
-async function deleteWorkReview(req, res) {
+async function deleteWorkReview(req, res, next) {
   const { id: workId, workreviewId } = req.params;
 
   try {
@@ -175,7 +172,7 @@ async function deleteWorkReview(req, res) {
 }
 }
 
-async function updateWorkReview(req, res) {
+async function updateWorkReview(req, res,next) {
   const { id: workId, workreviewId } = req.params;
   const { rating, comment } = req.body;
 
@@ -217,10 +214,7 @@ async function updateWorkReview(req, res) {
 
     return res.status(StatusCodes.OK).json(updatedWorkReview);
   } catch (error) {
-    console.error("Error updating work review:", error);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Internal server error" });
+    next(error)
   }
 }
 
