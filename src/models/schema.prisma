@@ -134,16 +134,16 @@ model Message {
     from     Int
     to       Int
     content  String
-    seen     Boolean
+    seen     Boolean    @default(false)
     workId   Int
-    work     Work    @relation(fields: [workId], references: [id])
+    work     Work    @relation(fields: [workId], references: [id],onDelete: Cascade)
     sender   User    @relation("Sender", fields: [from], references: [id])
     receiver User    @relation("Receiver", fields: [to], references: [id])
 }
 
 model WorkReview {
     id      Int    @id @default(autoincrement())
-    work    Work   @relation(fields: [workId], references: [id])
+    work    Work   @relation(fields: [workId], references: [id],onDelete: Cascade)
     workId  Int
     rating  Int
     comment String
@@ -154,4 +154,5 @@ enum Status {
     started
     canceled
     finished
+    approved
 }
