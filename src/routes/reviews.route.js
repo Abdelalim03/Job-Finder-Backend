@@ -19,7 +19,7 @@ reviewsRouter
   .route("/:id", authRoles(["client", "tasker", "admin"]))
   .get(getReviewById);
 reviewsRouter
-  .route("/create")
+  .route("/")
   .post(
     authenticateToken,
     authRoles(["client", "tasker"]),
@@ -28,7 +28,7 @@ reviewsRouter
     createReview
   );
 reviewsRouter
-  .route("/update/:id")
+  .route("/:id")
   .put(
     authenticateToken,
     authRoles(["client", "tasker", "admin"]),
@@ -38,7 +38,7 @@ reviewsRouter
     updateReview
   );
 reviewsRouter
-  .route("/delete/:id")
+  .route("/:id")
   .delete(
     authenticateToken,
     authRoles(["client", "tasker", "admin"]),

@@ -1,4 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
+const prisma = require("../models/prismaClient.js");
 
 const verifyReviewUser = async (req, res, next) => {
   const review = await prisma.review.findUnique({
@@ -10,9 +11,8 @@ const verifyReviewUser = async (req, res, next) => {
       error: "Review not found.",
     });
   }
-
-  if (review.userId !== req.user.userId || req.user.role !== "admin") {
-    return res.status(StatusCodes.UNAUTHORIZED).reject("Unauthorized");
+  if (review.userId !== req.user.userId && req.user.role !== "admin") {
+    return res.status(StatusCodes.UNAUTHORIZED).json({error:"Unauthorized"});
   }
   next();
 };

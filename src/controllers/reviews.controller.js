@@ -1,3 +1,4 @@
+const { StatusCodes } = require("http-status-codes");
 const prisma = require("../models/prismaClient.js");
 
 const createReview = async (req, res, next) => {
@@ -69,8 +70,9 @@ const updateReview = async (req, res, next) => {
 };
 
 const deleteReview = async (req, res, next) => {
+  const reviewId = parseInt(req.params.id);
+
   try {
-    
     await prisma.review.delete({
       where: {
         id: reviewId,
