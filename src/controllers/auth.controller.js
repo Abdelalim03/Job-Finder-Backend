@@ -34,7 +34,7 @@ const login = async (req, res, next) => {
     const tasker = await prisma.tasker.findUnique({
       where: { userId: user.id },
     });
-    const client = await prisma.tasker.findUnique({
+    const client = await prisma.client.findUnique({
       where: { userId: user.id },
     });
     const token = jwt.sign(
@@ -167,6 +167,15 @@ const registerClient = async (req, res, next) => {
         .status(StatusCodes.BAD_REQUEST)
         .json({ error: "Email already in use." });
     }
+    const tasker = await prisma.tasker.findUnique({
+      where: { userId: req.user?.id },
+    });
+
+    if (tasker){
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ error: "You are already a tasker." });
+    }
 
     const client = await prisma.client.create({
       data: {
@@ -208,6 +217,16 @@ const registerTasker = async (req, res, next) => {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ error: "Email already in use." });
+    }
+
+    const client = await prisma.client.findUnique({
+      where: { userId: req.user?.id },
+    });
+
+    if (client){
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ error: "You are already a a client." });
     }
 
     const taskerInfos = req.body;

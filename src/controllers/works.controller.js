@@ -5,10 +5,10 @@ const prisma = new PrismaClient();
 async function sendMessage(req, res) {
     const { workId, destinationUserId, content ,categoryId} = req.body;
     try {
-        if (workId) {
+        if (parseInt(workId)) {
             const existingWork = await prisma.work.findUnique({
                 where: {
-                    id: workId,
+                    id: parseInt(workId),
                 },
             });
 
@@ -28,7 +28,7 @@ async function sendMessage(req, res) {
                         to: parseInt(destinationUserId),
                         content: content,
                         seen: false,
-                        workId: workId,
+                        workId: parseInt(workId),
                     },
                 });
                 return res.status(200).json({ message: "Message sent successfully", data: message });
@@ -85,7 +85,6 @@ async function updateWork(req, res) {
             return res.status(404).json({ error: "Work not found" });
         }
 
-        console.log(existingWork);
 
         // Change the status from created to started 
 
@@ -155,13 +154,14 @@ async function deleteWork(req, res) {
 
 
 async function createWorkReview(req, res, next) {
-  const { workId, rating, comment } = req.body;
+  const { rating, comment } = req.body;
+  const { id: workId } = req.params;
 
-  try {
+  try { 
     // Check if the work exists
     const existingWork = await prisma.work.findUnique({
       where: {
-        id: workId,
+        id: parseInt(workId),
       },
     });
 
@@ -171,16 +171,23 @@ async function createWorkReview(req, res, next) {
         .json({ error: "Work not found" });
     }
 
+    if (existingWork.status !== "approved") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "This action cannot be completed because the work status is not 'approved'. Only approved work can proceed." });
+    }
+    
+
     if (existingWork.clientId !== req.user.userId) {
       return res
         .status(StatusCodes.FORBIDDEN)
-        .json({ error: "You must be the client included to this work" });
+        .json({ error: "You are not authorized to perform this action. Only the client associated with this work can proceed." });
     }
     const newWorkReview = await prisma.workReview.create({
       data: {
         work: {
           connect: {
-            id: workId,
+            id: parseInt(workId),
           },
         },
         rating,
@@ -203,6 +210,15 @@ async function deleteWorkReview(req, res, next) {
       where: {
         id: parseInt(workreviewId),
       },
+      select:{
+        work:{
+          select:{
+            status:true,
+            clientId:true
+          }
+        },
+        workId:true,
+      }
     });
 
     if (!existingWorkReview) {
@@ -211,10 +227,17 @@ async function deleteWorkReview(req, res, next) {
         .json({ error: "Work review not found" });
     }
 
+    if (existingWorkReview.work.status !== "approved") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "This action cannot be completed because the work status is not 'approved'. Only approved work can proceed." });
+    }
+    
     // Check if the user is authorized to delete the work review
     if (
-      existingWorkReview.workId !== parseInt(workId) ||
-      (existingWorkReview.userId !== req.user.userId && !req.user.isAdmin)
+      (existingWorkReview.workId !== parseInt(workId) ||
+      existingWorkReview.work.clientId !== req.user.userId) &&
+      req.user.role !== "admin"
     ) {
       return res
         .status(StatusCodes.FORBIDDEN)
@@ -246,6 +269,15 @@ async function updateWorkReview(req, res,next) {
       where: {
         id: parseInt(workreviewId),
       },
+      select:{
+        work:{
+          select:{
+            status:true,
+            clientId:true
+          }
+        },
+        workId:true,
+      }
     });
 
     if (!existingWorkReview) {
@@ -254,10 +286,17 @@ async function updateWorkReview(req, res,next) {
         .json({ error: "Work review not found" });
     }
 
+    if (existingWorkReview.work.status !== "approved") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "This action cannot be completed because the work status is not 'approved'. Only approved work can proceed." });
+    }
+
     // Check if the user is authorized to update the work review
+
     if (
-      existingWorkReview.workId !== parseInt(workId) ||
-      existingWorkReview.userId !== req.user.userId ||
+      (existingWorkReview.workId !== parseInt(workId) ||
+      existingWorkReview.work.clientId !== req.user.userId) &&
       req.user.role !== "admin"
     ) {
       return res
