@@ -44,14 +44,12 @@ const verifyAdmin = (req, res, next) => {
 
 function authRoles(roles) {
   return  (req, res, next)=> {
-console.log(roles);
-console.log(req.user?.role);
   try {
     if (roles.includes(req.user?.role)) {
       next();
     } else {
       return res.status(StatusCodes.UNAUTHORIZED).json({
-        error: "Unauthorized, this action require admin privileges",
+        error: "Unauthorized",
       });
     }
   } catch (error) {
