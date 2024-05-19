@@ -64,6 +64,7 @@ const login = async (req, res, next) => {
         id: user.id,
       },
       token: token,
+      role: client ? "client" : tasker ? "tasker" : "user",
     });
   } catch (error) {
     next(error);
@@ -161,7 +162,7 @@ const registerClient = async (req, res, next) => {
     const user = await prisma.client.findUnique({
       where: { userId: req.user?.id },
     });
-    
+
     if (user) {
       return res
         .status(StatusCodes.BAD_REQUEST)
@@ -171,7 +172,7 @@ const registerClient = async (req, res, next) => {
       where: { userId: req.user?.id },
     });
 
-    if (tasker){
+    if (tasker) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json({ error: "You are already a tasker." });
@@ -223,13 +224,15 @@ const registerTasker = async (req, res, next) => {
       where: { userId: req.user?.id },
     });
 
-    if (client){
+    if (client) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json({ error: "You are already a a client." });
     }
 
     const taskerInfos = req.body;
+
+    console.log(taskerInfos);
 
     if (req.file) {
       if (req.file.mimetype.startsWith("image/")) {
@@ -239,6 +242,10 @@ const registerTasker = async (req, res, next) => {
           .status(StatusCodes.BAD_REQUEST)
           .json({ error: "Invalid file type. Only images are allowed." });
       }
+    } else {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "No file uploaded. An image is required." });
     }
 
     const tasker = await prisma.tasker.create({
@@ -248,10 +255,10 @@ const registerTasker = async (req, res, next) => {
         profilePicture: taskerInfos.profilePicture,
       },
     });
-    taskerInfos.addresses = [{ wilaya: "Setif" }];
 
     for (let index = 0; index < taskerInfos?.addresses?.length; index++) {
       const address = taskerInfos?.addresses[index];
+      console.log(address);
       let addresses = await prisma.address.findMany({
         where: {
           wilaya: address["wilaya"],
