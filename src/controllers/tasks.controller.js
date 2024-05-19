@@ -21,7 +21,7 @@ const createTask = async (req, res, next) => {
 
   try {
     const { description, price, categoryId } = req.body;
-    const user_id = req.user.userId;
+    const user_id = req.user.id;
     if (categoryId !== undefined) {
       const existingCategory = await prisma.category.findUnique({
         where: {
@@ -62,7 +62,7 @@ const createTask = async (req, res, next) => {
 const deleteTask = async (req, res, next) => {
   try {
     const taskId = parseInt(req.params.id);
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const existingTask = await prisma.task.findUnique({
       where: {
@@ -112,7 +112,7 @@ const updateTask = async (req, res, next) => {
   try {
     const taskId = parseInt(req.params.id);
     const { description, price, categoryId } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
     uploadedImages = [];
     const files = req.files;
   

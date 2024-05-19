@@ -23,7 +23,7 @@ authRouter.route("/admin/login").post(loginRules, authValidator, loginAdmin);
 authRouter.route("/register").post(registerRules, authValidator, register);
 authRouter
   .route("/register/client")
-  .post(authenticateToken, verifyUser, registerClient);
+  .post(authenticateToken, authRoles(["user"]), registerClient);
 
 authRouter
   .route("/register/tasker")
@@ -37,3 +37,5 @@ authRouter
   );
 
 module.exports = authRouter;
+
+

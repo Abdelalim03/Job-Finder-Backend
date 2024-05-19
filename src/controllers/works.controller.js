@@ -26,13 +26,13 @@ async function sendMessage(req, res) {
         }
         if (
           [existingWork.clientId, existingWork.taskerId].sort().join(",") !==
-          [req.user.userId, destinationUserId].sort().join(",")
+          [req.user.id, destinationUserId].sort().join(",")
         ) {
           return res
             .status(StatusCodes.FORBIDDEN)
             .json({ error: "You must belong to this work" });
         }
-        if (req.user.userId === destinationUserId) {
+        if (req.user.id === destinationUserId) {
           return res
             .status(StatusCodes.BAD_REQUEST)
             .json({ error: "You cannot send a message to yourself" });
@@ -40,7 +40,7 @@ async function sendMessage(req, res) {
 
         const message = await prisma.message.create({
           data: {
-            from: req.user.userId,
+            from: req.user.id,
             to: parseInt(destinationUserId),
             content: content,
             seen: false,
@@ -58,11 +58,11 @@ async function sendMessage(req, res) {
     } else {
       let clientId =
         req.user.role == "client"
-          ? req.user.userId
+          ? req.user.id
           : parseInt(destinationUserId);
       let taskerId =
         req.user.role === "tasker"
-          ? req.user.userId
+          ? req.user.id
           : parseInt(destinationUserId);
           const task = await prisma.task.findUnique({
             where: {
@@ -85,7 +85,7 @@ async function sendMessage(req, res) {
 
       const message = await prisma.message.create({
         data: {
-          from: req.user.userId,
+          from: req.user.id,
           to: parseInt(destinationUserId),
           content: content,
           seen: false,
@@ -131,7 +131,7 @@ async function updateWork(req, res) {
     if (existingWork.status === "created" && status === "started") {
       if (
         req.user.role !== "client" ||
-        req.user.userId !== existingWork.clientId
+        req.user.id !== existingWork.clientId
       ) {
         return res
           .status(403)
@@ -155,15 +155,15 @@ async function updateWork(req, res) {
       }
     } else if (existingWork.status === "started" && status === "canceled") {
       if (
-        !(req.user.userId === existingWork.clientId) &&
-        !(req.user.userId === existingWork.taskerId)
+        !(req.user.id === existingWork.clientId) &&
+        !(req.user.id === existingWork.taskerId)
       ) {
         return res
           .status(403)
           .json({ error: "You must belong to this work to cancled the work" });
       }
     } else if (existingWork.status === "started" && status === "finished") {
-      if (!(req.user.userId === existingWork.taskerId)) {
+      if (!(req.user.id === existingWork.taskerId)) {
         return res
           .status(403)
           .json({ error: "You must be the tasker to update this work" });
@@ -172,7 +172,7 @@ async function updateWork(req, res) {
       existingWork.status === "finished" &&
       (status === "approved" || status === "canceled")
     ) {
-      if (!(req.user.userId === existingWork.clientId)) {
+      if (!(req.user.id === existingWork.clientId)) {
         return res
           .status(403)
           .json({ error: "You must be the Client to update this work" });
@@ -238,7 +238,7 @@ async function createWorkReview(req, res, next) {
     }
     
 
-    if (existingWork.clientId !== req.user.userId) {
+    if (existingWork.clientId !== req.user.id) {
       return res
         .status(StatusCodes.FORBIDDEN)
         .json({ error: "You are not authorized to perform this action. Only the client associated with this work can proceed." });
@@ -296,7 +296,7 @@ async function deleteWorkReview(req, res, next) {
     // Check if the user is authorized to delete the work review
     if (
       (existingWorkReview.workId !== parseInt(workId) ||
-      existingWorkReview.work.clientId !== req.user.userId) &&
+      existingWorkReview.work.clientId !== req.user.id) &&
       req.user.role !== "admin"
     ) {
       return res
@@ -356,7 +356,7 @@ async function updateWorkReview(req, res, next) {
 
     if (
       (existingWorkReview.workId !== parseInt(workId) ||
-      existingWorkReview.work.clientId !== req.user.userId) &&
+      existingWorkReview.work.clientId !== req.user.id) &&
       req.user.role !== "admin"
     ) {
       return res

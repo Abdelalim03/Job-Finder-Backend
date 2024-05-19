@@ -73,10 +73,7 @@ const loginRules = [
 ];
 
 const registerTaskerRules = [
-  body("description")
-    .notEmpty()
-    .withMessage("Description is required")
-    .trim()
+  body("description").notEmpty().withMessage("Description is required").trim(),
   // body("addresses")
   //   .notEmpty()
   //   .withMessage("Addresses are required")
@@ -100,8 +97,24 @@ const registerTaskerRules = [
   //   // If all addresses exist, return true
   //   return true;
   // })
+  body("Addresses")
+    .notEmpty()
+    .withMessage("Address is required")
+    .custom((value, { req }) => {
+      try {
+        req.body.addresses = JSON.parse(value);
+        value = JSON.parse(value);
+        // return Array.isArray(req.body.addresses) && req.body.addresses.length ;
+        console.log(Array.isArray(req.body.addresses) && req.body.addresses.length);
+        if (!(Array.isArray(req.body.addresses) && req.body.addresses.length)) {
+          return Promise.reject("addresses not valid");
+        }
+        return true
+      } catch (error) {
+        throw new Error("addresses not valid");
+      }
+    }),
 ];
-
 
 // const updateRules = [
 //   body('newPassword')

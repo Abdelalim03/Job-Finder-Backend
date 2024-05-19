@@ -11,9 +11,10 @@ const categoriesRouter = require("./src/routes/categories.route.js");
 const tasksRouter = require("./src/routes/tasks.route.js");
 const worksRouter = require("./src/routes/works.route.js");
 const reviewsRouter = require("./src/routes/reviews.route.js");
+const usersRouter = require("./src/routes/users.route.js");
 
-// const uploadsPath = path.join(__dirname, UPLOAD_PATH);
-// app.use('/uploads', express.static(uploadsPath));
+const uploadsPath = path.join(__dirname, UPLOAD_PATH);
+app.use('/uploads', express.static(uploadsPath));
 
 //global middlewares
 app.use(cors());
@@ -36,7 +37,9 @@ app.get("/", async (req, res) => {
   return res.send("Welcome to jobFinder API");
 });
 
+
 app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
 app.use("/api/categories",categoriesRouter)
 app.use("/api/tasks",tasksRouter)
 app.use("/api/reviews",reviewsRouter)

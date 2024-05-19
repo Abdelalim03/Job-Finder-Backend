@@ -5,6 +5,7 @@ const {
   deleteReview,
   updateReview,
   getReviewById,
+  getReviews,
 } = require("../controllers/reviews.controller.js");
 const authenticateToken = require("../middlewares/auth.middleware.js");
 const {
@@ -16,8 +17,15 @@ const { authRoles } = require("../middlewares/roles.middleware.js");
 const { verifyReviewUser } = require("../middlewares/reviews.middleware.js");
 
 reviewsRouter
+.route("/")
+.get(
+  getReviews
+);
+reviewsRouter
   .route("/:id", authRoles(["client", "tasker", "admin"]))
   .get(getReviewById);
+
+
 reviewsRouter
   .route("/")
   .post(
