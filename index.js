@@ -72,13 +72,13 @@ if (process.env.NODE_ENV !== "test") {
 //get all offers 
 // get offers by page 
 //get offer details by id with his reviews/user did the reviews
+// filter offer by category,wilaya,commune,maxPrice
 
 // create new chat 
 // get my chats 
 // get  chat messages by chatId
 
 
-// filter offer by category,wilaya,commune,maxPrice
 //get profile info by Id (with the authorizations )
 //update profile
 

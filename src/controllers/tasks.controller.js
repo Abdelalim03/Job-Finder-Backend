@@ -5,7 +5,6 @@ const { setTaskImageUrl, removeTaskImage } = require("../utils/managePictures.js
 const createTask = async (req, res, next) => {
   uploadedImages = [];
   const files = req.files;
-
   if (files?.length > 0) {
     for (const file of files) {
       if (file.mimetype.startsWith("image/")) {
@@ -202,6 +201,7 @@ const updateTask = async (req, res, next) => {
 
 const getTasks = async (req, res, next) => {
   try {
+
     const { page = 1, limit = 10 } = req.query;
 
     const tasks = await prisma.task.findMany({
@@ -212,7 +212,12 @@ const getTasks = async (req, res, next) => {
         category: true,
         tasker: {
           include: {
-            User: true,
+            User: {select : {
+              firstName:true,
+              id:true,
+              lastName:true,
+              email:true
+            }},
           },
         },
       },
@@ -295,9 +300,10 @@ const getTaskById = async (req, res, next) => {
   }
 };
 
+
 const filterTasks = async (req, res, next) => {
   try {
-    const { categoryId, wilaya, commune, maxPrice } = req.query;
+    const { categoryId, wilaya, commune, maxPrice, page = 1, pageSize = 10 } = req.query;
 
     let filterOptions = {};
 
@@ -339,6 +345,15 @@ const filterTasks = async (req, res, next) => {
       };
     }
 
+    // Calculate skip count for pagination
+    const skipCount = (page - 1) * pageSize;
+
+    // Count total tasks matching the filter options
+    const totalTasksCount = await prisma.task.count({
+      where: filterOptions,
+    });
+
+    // Fetch the filtered tasks with pagination
     const filteredTasks = await prisma.task.findMany({
       where: filterOptions,
       include: {
@@ -346,10 +361,16 @@ const filterTasks = async (req, res, next) => {
         tasker: true,
         category: true,
       },
+      skip: skipCount,
+      take: parseInt(pageSize),
     });
+
+    // Calculate total number of pages
+    const totalPages = Math.ceil(totalTasksCount / pageSize);
 
     res.status(StatusCodes.OK).json({
       data: filteredTasks,
+      totalPages: totalPages,
     });
   } catch (error) {
     next(error);
