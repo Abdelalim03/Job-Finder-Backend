@@ -199,8 +199,79 @@ const updateTask = async (req, res, next) => {
   }
 };
 
+
+const getTasks = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const tasks = await prisma.task.findMany({
+      skip: (page - 1) * limit,
+      take: parseInt(limit),
+      include: {
+        taskImages: true,
+        category: true,
+        tasker: {
+          include: {
+            User: true,
+          },
+        },
+      },
+    });
+
+    const totalTasks = await prisma.task.count();
+
+    res.status(StatusCodes.OK).json({
+      data: tasks,
+      total: totalTasks,
+      page: parseInt(page),
+      totalPages: Math.ceil(totalTasks / limit),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+const getTaskById = async (req, res, next) => {
+  try {
+    const taskId = parseInt(req.params.id);
+
+    const task = await prisma.task.findUnique({
+      where: {
+        id: taskId,
+      },
+      include: {
+        taskImages: true,
+        category: true,
+        tasker: {
+          include: {
+            User: true,
+          },
+        },
+        WorkReview: true,
+      },
+    });
+
+    if (!task) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        error: "Task not found.",
+      });
+    }
+
+    res.status(StatusCodes.OK).json({
+      data: task,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 module.exports = {
   createTask,
   updateTask,
   deleteTask,
+  getTasks,
+  getTaskById
 };
