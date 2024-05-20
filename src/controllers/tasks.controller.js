@@ -295,11 +295,71 @@ const getTaskById = async (req, res, next) => {
   }
 };
 
+const filterTasks = async (req, res, next) => {
+  try {
+    const { categoryId, wilaya, commune, maxPrice } = req.query;
 
+    let filterOptions = {};
+
+    // Filter by category ID if provided
+    if (categoryId) {
+      filterOptions.categoryId = parseInt(categoryId);
+    }
+
+    // Filter by wilaya if provided
+    if (wilaya) {
+      filterOptions.tasker = {
+        TaskerAddress: {
+          some: {
+            address: {
+              wilaya: wilaya,
+            },
+          },
+        },
+      };
+    }
+
+    // Filter by commune if provided
+    if (commune) {
+      filterOptions.tasker = {
+        TaskerAddress: {
+          some: {
+            address: {
+              commune: commune,
+            },
+          },
+        },
+      };
+    }
+
+    // Filter by max price if provided
+    if (maxPrice) {
+      filterOptions.price = {
+        lte: parseFloat(maxPrice),
+      };
+    }
+
+    const filteredTasks = await prisma.task.findMany({
+      where: filterOptions,
+      include: {
+        taskImages: true,
+        tasker: true,
+        category: true,
+      },
+    });
+
+    res.status(StatusCodes.OK).json({
+      data: filteredTasks,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = {
   createTask,
   updateTask,
   deleteTask,
   getTasks,
-  getTaskById
+  getTaskById,
+  filterTasks
 };
