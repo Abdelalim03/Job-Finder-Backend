@@ -243,13 +243,8 @@ const getTaskById = async (req, res, next) => {
       },
       include: {
         taskImages: true,
-        category: true,
-        tasker: {
-          include: {
-            User: true,
-          },
-        },
-        WorkReview: true,
+        tasker: true,
+        category:true,
       },
     });
 
@@ -259,8 +254,41 @@ const getTaskById = async (req, res, next) => {
       });
     }
 
+    // Flatten the array of work reviews
+    const works = await prisma.work.findMany({
+      where: {
+        categoryId: task.categoryId,
+        taskerId: task.taskerId,
+      },
+      include: {
+        WorkReview: true,
+        client: { include : {User : {
+          select : 
+          {
+            id : true,
+            firstName:true,
+            lastName:true
+          }
+        }
+
+        }}
+      },
+    });
+
+    // Flatten the array of WorkReviews
+    const workReviews = works.flatMap((work) => {
+      return work.WorkReview.map((review) => {
+        return {
+          ...review,
+          client: work.client.User, 
+        };
+      });
+    });
     res.status(StatusCodes.OK).json({
-      data: task,
+      data: {
+        task: task,
+        workReviews: workReviews,
+      },
     });
   } catch (error) {
     next(error);
