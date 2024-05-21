@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const { StatusCodes } = require("http-status-codes");
+const { user } = require("../models/prismaClient");
 const prisma = new PrismaClient();
 
 async function sendMessage(req, res) {
@@ -381,6 +382,79 @@ async function updateWorkReview(req, res, next) {
   }
 }
 
+
+async function getMyWorks(req,res,next) {
+  try {
+    const user = req.user
+    const userId = req.user.id
+    // Get the works where the current user is the client
+    if(user.role === "client")
+    {
+      const clientWorks = await prisma.work.findMany({
+        where: {
+          clientId: userId,
+        },
+        include: {
+          tasker: {
+            include: {
+              User: {
+                select: {
+                  firstName: true, 
+                  lastName: true,
+                  email : true , 
+                  id: true
+                },
+              },
+            },
+          },
+        },
+      });
+      return res.status(StatusCodes.OK).json(clientWorks);
+
+    }
+    else{
+      const taskerWorks = await prisma.work.findMany({
+        where: {
+          taskerId: userId,
+        },
+        include: {
+          client: {
+            include: {
+              User: {
+                select: {
+                  firstName: true, 
+                  lastName: true,
+                  email : true , 
+                  id: true
+                },
+              },
+            },
+          },
+        },
+      });
+      return res.status(StatusCodes.OK).json(taskerWorks);
+
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
+const getMessagesByWork = async (req, res, next) => {
+  const workId = parseInt(req.params.id); 
+
+  try {
+    const messages = await prisma.message.findMany({
+      where: {
+        workId: workId,
+      },
+    });
+    res.status(200).json(messages);
+  } catch (error) {
+    console.error("Error retrieving messages by work ID:", error);
+    res.status(500).json({ error: "An error occurred while retrieving messages" });
+  }
+};
 module.exports = {
   sendMessage,
   updateWork,
@@ -388,4 +462,6 @@ module.exports = {
   createWorkReview,
   deleteWorkReview,
   updateWorkReview,
+  getMyWorks,
+  getMessagesByWork
 };

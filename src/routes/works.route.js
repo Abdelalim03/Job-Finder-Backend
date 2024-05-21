@@ -12,10 +12,15 @@ const {
     createWorkReview,
     deleteWorkReview,
     updateWorkReview,
+    getMyWorks,
+    getMessagesByWork,
   } = require("../controllers/works.controller.js");
 const { messageRules, workValidator, updateWorkRules } = require("../middlewares/validators/works.valdiator.js");
 
 worksRouter.route("/messages").post(authenticateToken,authRoles(['client','tasker']),messageRules,workValidator,sendMessage)
+worksRouter.route("/").get(authenticateToken,authRoles(['client','tasker']),messageRules,workValidator,getMyWorks)
+worksRouter.route("/:id").get(authenticateToken,authRoles(['client','tasker']),messageRules,workValidator,getMessagesByWork)
+
 worksRouter.route("/:id").put(authenticateToken, authRoles(['client','tasker']),updateWorkRules,workValidator,updateWork) 
 worksRouter.route("/:id").delete(authenticateToken, authRoles(['tasker']),deleteWork)
 worksRouter
