@@ -15,11 +15,12 @@ const {
 } = require("../middlewares/validators/auth.validator.js");
 const { authRoles } = require("../middlewares/roles.middleware.js");
 const authenticateToken = require("../middlewares/auth.middleware.js");
-const { getCurrentUser } = require("../controllers/users.controller.js");
+const { getCurrentUser, getUserByIdTask } = require("../controllers/users.controller.js");
 
 
 usersRouter.use(authenticateToken);
 // usersRouter.get('/', userController.readAllUsers);
 usersRouter.get('/me', getCurrentUser);
+usersRouter.get('/:id', getUserByIdTask);
 
 module.exports = usersRouter;
