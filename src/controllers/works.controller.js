@@ -278,13 +278,14 @@ async function createWorkReview(req, res, next) {
             id: parseInt(workId),
           },
         },
-        rating,
-        comment,
+        rating : parseInt(rating) ,
+        comment
       },
     });
 
     return res.status(StatusCodes.CREATED).json(newWorkReview);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 }
