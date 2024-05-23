@@ -60,6 +60,9 @@ async function sendMessage(req, res) {
             seen: false,
             workId: workId,
           },
+          include: {
+            work: true,
+          },
         });
 
         return res
@@ -98,7 +101,7 @@ async function sendMessage(req, res) {
           clientId: clientId,
           taskerId: taskerId,
           categoryId: parseInt(categoryId),
-          status: req.user.role === "tasker" ? "started" : "pending", // Initialize status based on the sender
+          status: req.user.role === "tasker" ? "started" : "created", // Initialize status based on the sender
         },
       });
 
@@ -109,6 +112,9 @@ async function sendMessage(req, res) {
           content: content,
           seen: false,
           workId: newWork.id,
+        },
+        include: {
+          work: true,
         },
       });
 
@@ -430,6 +436,9 @@ async function getMyWorks(req,res,next) {
             },
           },
         },
+        orderBy: {
+          id: 'desc', // Order by id in descending order
+        },
       });
       return res.status(StatusCodes.OK).json(clientWorks);
 
@@ -453,6 +462,9 @@ async function getMyWorks(req,res,next) {
               },
             },
           },
+        },
+        orderBy: {
+          id: 'desc', // Order by id in descending order
         },
       });
       return res.status(StatusCodes.OK).json(taskerWorks);
