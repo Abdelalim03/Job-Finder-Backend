@@ -45,6 +45,7 @@ app.use("/api/tasks",tasksRouter)
 app.use("/api/reviews",reviewsRouter)
 app.use("/api/works",worksRouter)
 
+//
 
 //health check route (used by docker compose)
 app.get("/health", (req, res) => res.send("OK"));
@@ -68,5 +69,17 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 
+//get all offers 
+// get offers by page 
+//get offer details by id with his reviews/user did the reviews
+// filter offer by category,wilaya,commune,maxPrice
+
+// create new chat 
+// get my chats 
+// get  chat messages by chatId
+
+
+//get profile info by Id (with the authorizations )
+//update profile
 
 module.exports = app;

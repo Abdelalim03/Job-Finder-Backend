@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const { StatusCodes } = require("http-status-codes");
+const { user } = require("../models/prismaClient");
 const prisma = new PrismaClient();
 
 async function sendMessage(req, res) {
@@ -12,30 +13,43 @@ async function sendMessage(req, res) {
         },
       });
 
+      console.log(existingWork);
       if (existingWork) {
-        const task = await prisma.task.findUnique({
+        const task = await prisma.task.findFirst({
           where: {
             categoryId: parseInt(categoryId),
             taskerId: existingWork.taskerId,
           },
         });
-        if (!task){
+
+        if (!task) {
           return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ error: "The task no longer exists" });
+            .status(StatusCodes.NOT_FOUND)
+            .json({ error: "The task no longer exists" });
         }
-        if (
-          [existingWork.clientId, existingWork.taskerId].sort().join(",") !==
-          [req.user.id, destinationUserId].sort().join(",")
-        ) {
-          return res
-            .status(StatusCodes.FORBIDDEN)
-            .json({ error: "You must belong to this work" });
-        }
+
         if (req.user.id === destinationUserId) {
           return res
             .status(StatusCodes.BAD_REQUEST)
             .json({ error: "You cannot send a message to yourself" });
+        }
+
+        // Check if the sender is the tasker and if it is the first message for this work
+        if (req.user.role === "tasker") {
+          const taskerMessageCount = await prisma.message.count({
+            where: {
+              workId: workId,
+              from: req.user.id,
+            },
+          });
+
+          if (taskerMessageCount === 0) {
+            // Update work status to "started"
+            await prisma.work.update({
+              where: { id: workId },
+              data: { status: "started" },
+            });
+          }
         }
 
         const message = await prisma.message.create({
@@ -46,7 +60,11 @@ async function sendMessage(req, res) {
             seen: false,
             workId: workId,
           },
+          include: {
+            work: true,
+          },
         });
+
         return res
           .status(200)
           .json({ message: "Message sent successfully", data: message });
@@ -64,22 +82,26 @@ async function sendMessage(req, res) {
         req.user.role === "tasker"
           ? req.user.id
           : parseInt(destinationUserId);
-          const task = await prisma.task.findUnique({
-            where: {
-              categoryId: parseInt(categoryId),
-              taskerId: taskerId,
-            },
-          });
-          if (!task){
-            return res
-            .status(StatusCodes.NOT_FOUND)
-            .json({ error: "The task no longer exists" });
-          }
+
+      const task = await prisma.task.findFirst({
+        where: {
+          categoryId: parseInt(categoryId),
+          taskerId: taskerId,
+        },
+      });
+
+      if (!task) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ error: "The task no longer exists" });
+      }
+
       const newWork = await prisma.work.create({
         data: {
           clientId: clientId,
           taskerId: taskerId,
           categoryId: parseInt(categoryId),
+          status: req.user.role === "tasker" ? "started" : "created", // Initialize status based on the sender
         },
       });
 
@@ -91,7 +113,11 @@ async function sendMessage(req, res) {
           seen: false,
           workId: newWork.id,
         },
+        include: {
+          work: true,
+        },
       });
+
       return res
         .status(200)
         .json({ message: "Message sent successfully", data: message });
@@ -103,6 +129,8 @@ async function sendMessage(req, res) {
       .json({ error: "An error occurred while sending the message" });
   }
 }
+
+
 
 async function updateWork(req, res) {
   const workId = parseInt(req.params.id);
@@ -250,13 +278,14 @@ async function createWorkReview(req, res, next) {
             id: parseInt(workId),
           },
         },
-        rating,
-        comment,
+        rating : parseInt(rating) ,
+        comment
       },
     });
 
     return res.status(StatusCodes.CREATED).json(newWorkReview);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 }
@@ -381,6 +410,172 @@ async function updateWorkReview(req, res, next) {
   }
 }
 
+
+async function getMyWorks(req,res,next) {
+  try {
+    const user = req.user
+    const userId = req.user.id
+    // Get the works where the current user is the client
+    if(user.role === "client")
+    {
+      const clientWorks = await prisma.work.findMany({
+        where: {
+          clientId: userId,
+        },
+        include: {
+          category:true,
+          tasker: {
+            include: {
+              User: {
+                select: {
+                  firstName: true, 
+                  lastName: true,
+                  email : true , 
+                  id: true
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          id: 'desc', // Order by id in descending order
+        },
+      });
+      return res.status(StatusCodes.OK).json(clientWorks);
+
+    }
+    else{
+      const taskerWorks = await prisma.work.findMany({
+        where: {
+          taskerId: userId,
+        },
+        include: {
+          category:true,
+          client: {
+            include: {
+              User: {
+                select: {
+                  firstName: true, 
+                  lastName: true,
+                  email : true , 
+                  id: true
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          id: 'desc', // Order by id in descending order
+        },
+      });
+      return res.status(StatusCodes.OK).json(taskerWorks);
+
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function SearchInMyWorks(req, res, next) {
+  try {
+    const user = req.user;
+    const userId = req.user.id;
+    const { search } = req.query;
+
+    // Construct the search filter
+    const searchFilter = search
+      ? {
+          OR: [
+            { tasker: { User: { firstName: { contains: search, mode: 'insensitive' } } } },
+            { client: { User: { firstName: { contains: search, mode: 'insensitive' } } } }
+          ]
+        }
+      : {};
+
+    let works;
+    if (user.role === 'client') {
+      works = await prisma.work.findMany({
+        where: {
+          clientId: userId,
+          ...searchFilter
+        },
+        include: {
+          category: true,
+          tasker: {
+            include: {
+              User: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  id: true
+                }
+              }
+            }
+          }
+        }
+      });
+    } else {
+      works = await prisma.work.findMany({
+        where: {
+          taskerId: userId,
+          ...searchFilter
+        },
+        include: {
+          category: true,
+          client: {
+            include: {
+              User: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  id: true
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    return res.status(StatusCodes.OK).json(works);
+  } catch (error) {
+    next(error);
+  }
+}
+const getMessagesByWork = async (req, res, next) => {
+  const userId = req.user.id; // Assuming user ID is available in the request object
+  const workId = parseInt(req.params.id); 
+
+  try {
+    const messages = await prisma.message.findMany({
+      where: {
+        workId: workId,
+      },
+      select: {
+        id: true,
+        from: true,
+        to: true,
+        content: true,
+        seen: true,
+      }
+    });
+
+    // Add a custom field is_sender to each message
+    const messagesWithIsSender = messages.map(message => {
+      return {
+        ...message,
+        is_sender: message.from === userId
+      };
+    });
+
+    res.status(200).json(messagesWithIsSender);
+  } catch (error) {
+    console.error("Error retrieving messages by work ID:", error);
+    res.status(500).json({ error: "An error occurred while retrieving messages" });
+  }
+};
 module.exports = {
   sendMessage,
   updateWork,
@@ -388,4 +583,7 @@ module.exports = {
   createWorkReview,
   deleteWorkReview,
   updateWorkReview,
+  getMyWorks,
+  getMessagesByWork,
+  SearchInMyWorks
 };

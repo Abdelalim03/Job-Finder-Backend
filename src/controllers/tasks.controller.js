@@ -5,7 +5,6 @@ const { setTaskImageUrl, removeTaskImage } = require("../utils/managePictures.js
 const createTask = async (req, res, next) => {
   uploadedImages = [];
   const files = req.files;
-
   if (files?.length > 0) {
     for (const file of files) {
       if (file.mimetype.startsWith("image/")) {
@@ -199,8 +198,189 @@ const updateTask = async (req, res, next) => {
   }
 };
 
+
+const getTasks = async (req, res, next) => {
+  try {
+
+    const { page = 1, limit = 10 } = req.query;
+
+    const tasks = await prisma.task.findMany({
+      skip: (page - 1) * limit,
+      take: parseInt(limit),
+      include: {
+        taskImages: true,
+        category: true,
+        tasker: {
+          include: {
+            User: {select : {
+              firstName:true,
+              id:true,
+              lastName:true,
+              email:true
+            }},
+          },
+        },
+      },
+    });
+
+    const totalTasks = await prisma.task.count();
+
+    res.status(StatusCodes.OK).json({
+      data: tasks,
+      total: totalTasks,
+      page: parseInt(page),
+      totalPages: Math.ceil(totalTasks / limit),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+const getTaskById = async (req, res, next) => {
+  try {
+    const taskId = parseInt(req.params.id);
+
+    const task = await prisma.task.findUnique({
+      where: {
+        id: taskId,
+      },
+      include: {
+        taskImages: true,
+        tasker: true,
+        category:true,
+      },
+    });
+
+    if (!task) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        error: "Task not found.",
+      });
+    }
+
+    // Flatten the array of work reviews
+    const works = await prisma.work.findMany({
+      where: {
+        categoryId: task.categoryId,
+        taskerId: task.taskerId,
+      },
+      include: {
+        WorkReview: true,
+        client: { include : {User : {
+          select : 
+          {
+            id : true,
+            firstName:true,
+            lastName:true
+          }
+        }
+
+        }}
+      },
+    });
+
+    // Flatten the array of WorkReviews
+    const workReviews = works.flatMap((work) => {
+      return work.WorkReview.map((review) => {
+        return {
+          ...review,
+          client: work.client.User, 
+        };
+      });
+    });
+    res.status(StatusCodes.OK).json({
+      data: {
+        task: task,
+        workReviews: workReviews,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+const filterTasks = async (req, res, next) => {
+  try {
+    const { categoryId, wilaya, commune, maxPrice, page = 1, pageSize = 10 } = req.query;
+
+    let filterOptions = {};
+
+    // Filter by category ID if provided
+    if (categoryId) {
+      filterOptions.categoryId = parseInt(categoryId);
+    }
+
+    // Filter by wilaya if provided
+    if (wilaya) {
+      filterOptions.tasker = {
+        TaskerAddress: {
+          some: {
+            address: {
+              wilaya: wilaya,
+            },
+          },
+        },
+      };
+    }
+
+    // Filter by commune if provided
+    if (commune) {
+      filterOptions.tasker = {
+        TaskerAddress: {
+          some: {
+            address: {
+              commune: commune,
+            },
+          },
+        },
+      };
+    }
+
+    // Filter by max price if provided
+    if (maxPrice) {
+      filterOptions.price = {
+        lte: parseFloat(maxPrice),
+      };
+    }
+
+    // Calculate skip count for pagination
+    const skipCount = (page - 1) * pageSize;
+
+    // Count total tasks matching the filter options
+    const totalTasksCount = await prisma.task.count({
+      where: filterOptions,
+    });
+
+    // Fetch the filtered tasks with pagination
+    const filteredTasks = await prisma.task.findMany({
+      where: filterOptions,
+      include: {
+        taskImages: true,
+        tasker: true,
+        category: true,
+      },
+      skip: skipCount,
+      take: parseInt(pageSize),
+    });
+
+    // Calculate total number of pages
+    const totalPages = Math.ceil(totalTasksCount / pageSize);
+
+    res.status(StatusCodes.OK).json({
+      data: filteredTasks,
+      totalPages: totalPages,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = {
   createTask,
   updateTask,
   deleteTask,
+  getTasks,
+  getTaskById,
+  filterTasks
 };
