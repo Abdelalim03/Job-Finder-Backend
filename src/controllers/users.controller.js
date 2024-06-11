@@ -16,6 +16,40 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
+const getUserById = async (req,res,next)=>{
+  const userId = parseInt(req.params.id)
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        taskers: {
+          select: {
+            profilePicture: true,
+            userId: true,
+            description: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({ error: "User not found" });
+    }
+
+    res.status(StatusCodes.OK).json(user);
+  } catch (error) {
+    console.error("Error retrieving user by ID:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "An error occurred while retrieving the user" });
+  }
+}
+
 const getUserByIdTask = async (req, res, next) => {
   const taskId = parseInt(req.params.id);
 
@@ -54,5 +88,6 @@ const getUserByIdTask = async (req, res, next) => {
 
 module.exports = {
   getCurrentUser,
-  getUserByIdTask
+  getUserByIdTask,
+  getUserById
 };
