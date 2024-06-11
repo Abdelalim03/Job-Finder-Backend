@@ -23,19 +23,17 @@ const getUserById = async (req,res,next)=>{
       where: {
         id: userId,
       },
-      select : {
-        id,
-        firstName,
-        lastName,
-        email,
-        phoneNumber
-      },
-      include: {
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
         taskers: {
           select: {
             profilePicture: true,
             userId: true,
-            description : true,
+            description: true,
           },
         },
       },
