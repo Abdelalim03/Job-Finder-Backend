@@ -70,6 +70,7 @@ const getReviews = async (req, res, next) => {
         },
         rating: true,
         comment: true,
+        date:true
       },
     });
 

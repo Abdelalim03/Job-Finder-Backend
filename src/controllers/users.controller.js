@@ -34,23 +34,52 @@ const getUserById = async (req, res, next) => {
             profilePicture: true,
             userId: true,
             description: true,
-            _count:{
-              select:{
-                works:{
-                  where:{status: "approved"}
-                }
-              }
-            }
-          }
-        }
-      }
+            Task: {
+              select: {
+                id:true,
+                price:true,
+                description:true,
+                ratingAverage:true,
+                reviewsCount:true,
+                category: {
+                  select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                  },
+                },
+              },
+            },
+            _count: {
+              select: {
+                works: {
+                  where: { status: "approved" },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({ error: "User not found" });
     }
 
-    
+    // Extract and deduplicate categories
+    const uniqueCategories = {};
+    user.taskers.forEach(tasker => {
+      tasker.Task.forEach(task => {
+        const category = task.category;
+        uniqueCategories[category.id] = category;
+      });
+    });
+
+    // Convert uniqueCategories object to an array
+    const categories = Object.values(uniqueCategories);
+
+    // Add unique categories to the user object
+    user.taskers[0].categories = categories;
 
     res.status(StatusCodes.OK).json({ user });
   } catch (error) {
@@ -58,6 +87,7 @@ const getUserById = async (req, res, next) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "An error occurred while retrieving the user" });
   }
 }
+
 
 
 const getUserByIdTask = async (req, res, next) => {
