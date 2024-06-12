@@ -16,8 +16,8 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
-const getUserById = async (req,res,next)=>{
-  const userId = parseInt(req.params.id)
+const getUserById = async (req, res, next) => {
+  const userId = parseInt(req.params.id);
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -34,21 +34,31 @@ const getUserById = async (req,res,next)=>{
             profilePicture: true,
             userId: true,
             description: true,
-          },
-        },
-      },
+            _count:{
+              select:{
+                works:{
+                  where:{status: "approved"}
+                }
+              }
+            }
+          }
+        }
+      }
     });
 
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({ error: "User not found" });
     }
 
-    res.status(StatusCodes.OK).json(user);
+    
+
+    res.status(StatusCodes.OK).json({ user });
   } catch (error) {
     console.error("Error retrieving user by ID:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "An error occurred while retrieving the user" });
   }
 }
+
 
 const getUserByIdTask = async (req, res, next) => {
   const taskId = parseInt(req.params.id);
