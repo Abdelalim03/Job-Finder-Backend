@@ -15,7 +15,8 @@ const {
 } = require("../middlewares/validators/auth.validator.js");
 const { authRoles } = require("../middlewares/roles.middleware.js");
 const authenticateToken = require("../middlewares/auth.middleware.js");
-const { getCurrentUser, getUserByIdTask, getUserById } = require("../controllers/users.controller.js");
+const { getCurrentUser, getUserByIdTask, getUserById, updateTasker, getTaskerAddresses, addTaskerAddress, deleteTaskerAddress } = require("../controllers/users.controller.js");
+const { upload } = require("../configs/index.js");
 
 
 usersRouter.use(authenticateToken);
@@ -23,6 +24,10 @@ usersRouter.use(authenticateToken);
 usersRouter.get('/me', getCurrentUser);
 usersRouter.get('/:id', getUserByIdTask);
 usersRouter.get('/user/:id', getUserById);
+usersRouter.route('/updateTasker').put(upload.single("profilePicture"),updateTasker);
+usersRouter.route('/addresses/:id').get(getTaskerAddresses);
+usersRouter.route('/addresses/').post(addTaskerAddress);
+usersRouter.route('/addresses/').delete(deleteTaskerAddress);
 
 
 
