@@ -26,8 +26,8 @@ usersRouter.get('/:id', getUserByIdTask);
 usersRouter.get('/user/:id', getUserById);
 usersRouter.route('/updateTasker').put(upload.single("profilePicture"),updateTasker);
 usersRouter.route('/addresses/:id').get(getTaskerAddresses);
-usersRouter.route('/addresses/').post(addTaskerAddress);
-usersRouter.route('/addresses/:id').delete(deleteTaskerAddress);
+usersRouter.route('/addresses/').post(authRoles(["tasker"]),addTaskerAddress);
+usersRouter.route('/addresses/:id').delete(authRoles(["tasker"]),deleteTaskerAddress);
 
 
 

@@ -237,6 +237,37 @@ const getTasks = async (req, res, next) => {
 };
 
 
+const getMyTasks = async (req, res, next) => {
+  try {
+
+    const {userId } = req.user.id;
+
+    const tasks = await prisma.task.findMany({
+      where: {taskerId : userId},
+      include: {
+        taskImages: true,
+        category: true,
+        tasker: {
+          include: {
+            User: {select : {
+              firstName:true,
+              id:true,
+              lastName:true,
+              email:true
+            }},
+          },
+        },
+      },
+    });
+
+
+    res.status(StatusCodes.OK).json({
+      data: tasks,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const getTaskById = async (req, res, next) => {
   try {
@@ -382,5 +413,6 @@ module.exports = {
   deleteTask,
   getTasks,
   getTaskById,
-  filterTasks
+  filterTasks,
+  getMyTasks
 };
