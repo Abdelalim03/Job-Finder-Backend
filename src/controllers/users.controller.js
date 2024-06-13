@@ -216,7 +216,7 @@ const deleteTaskerAddress = async (req, res) => {
           }
       });
 
-      res.status(204).send();
+      res.status(200).json({"message":"address deleted successfully "});
   } catch (error) {
       res.status(400).json({ error: error.message });
   }
