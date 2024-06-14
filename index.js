@@ -31,12 +31,10 @@ app.use(
 );
 
 app.get("/", async (req, res) => {
-  const addresses = await prisma.address.findMany({});
-
-  console.log(addresses);
   return res.send("Welcome to jobFinder API");
 });
 
+//routes
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
@@ -45,13 +43,10 @@ app.use("/api/tasks",tasksRouter)
 app.use("/api/reviews",reviewsRouter)
 app.use("/api/works",worksRouter)
 
-//
 
 //health check route (used by docker compose)
 app.get("/health", (req, res) => res.send("OK"));
 
-//routes
-// app.use('/api/auth', authRouter);
 
 //global error handler
 app.use(async (err, req, res, next) => {

@@ -185,7 +185,6 @@ const updateTask = async (req, res, next) => {
     });
 
     for (const imageUrl of existingTask.taskImages) {
-      console.log(imageUrl.url);
       const filename = imageUrl.url;
       await removeTaskImage(filename)
     }

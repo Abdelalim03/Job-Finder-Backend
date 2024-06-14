@@ -13,7 +13,6 @@ async function sendMessage(req, res) {
         },
       });
 
-      console.log(existingWork);
       if (existingWork) {
         const task = await prisma.task.findFirst({
           where: {
@@ -323,7 +322,6 @@ async function createWorkReview(req, res, next) {
 
     return res.status(StatusCodes.CREATED).json(newWorkReview);
   } catch (error) {
-    console.log(error);
     next(error);
   }
 }

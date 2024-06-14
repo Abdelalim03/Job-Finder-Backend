@@ -111,7 +111,6 @@ const updateTaskerAddress = async (taskerId, addresses) => {
     (address) => !providedAddressIds.includes(address.addressId)
   );
 
-  console.log(addressesToAdd, addressesToDelete, currentAddressIds);
   try {
     // Add new addresses
     await Promise.all(
@@ -294,7 +293,6 @@ const getUserById = async (req, res, next) => {
 
     // Convert uniqueCategories object to an array
     const categories = Object.values(uniqueCategories);
-    console.log(categories);
     // Add unique categories to the user object
     user.taskers[0].categories = categories;
 

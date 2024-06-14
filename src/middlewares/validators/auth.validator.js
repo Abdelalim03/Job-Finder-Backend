@@ -105,7 +105,6 @@ const registerTaskerRules = [
         req.body.addresses = JSON.parse(value);
         value = JSON.parse(value);
         // return Array.isArray(req.body.addresses) && req.body.addresses.length ;
-        console.log(Array.isArray(req.body.addresses) && req.body.addresses.length);
         if (!(Array.isArray(req.body.addresses) && req.body.addresses.length)) {
           return Promise.reject("addresses not valid");
         }
