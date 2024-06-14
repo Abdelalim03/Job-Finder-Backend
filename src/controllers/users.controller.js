@@ -17,6 +17,74 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
+
+const getCurrentClient = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id:true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+const updateClientProfile = async (req, res, next) => {
+  const userId = req.user.id;
+  const {
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    password,
+  } = req.body;
+
+  const updateUserData = {};
+  if (firstName !== undefined) updateUserData.firstName = firstName;
+  if (lastName !== undefined) updateUserData.lastName = lastName;
+  if (email !== undefined) updateUserData.email = email;
+  if (phoneNumber !== undefined) updateUserData.phoneNumber = phoneNumber;
+  if (password !== undefined) updateUserData.password = await hashPassword(password);
+
+  try {
+    const updatedClient = await prisma.user.update({
+      where: { id: parseInt(userId) },
+      data: {
+        ...updateUserData,
+      },
+      select : {
+        id:true,
+        firstName:true,
+        lastName:true,
+        email:true,
+        phoneNumber:true,
+
+      }
+    });
+
+    res.status(200).json(updatedClient);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
 const updateTaskerAddress = async (taskerId, addresses) => {
   // Get the current addresses associated with the tasker
   const currentAddresses = await prisma.taskerAddress.findMany({
@@ -113,10 +181,7 @@ const updateTasker = async (req, res) => {
   if (lastName !== undefined) updateUserData.lastName = lastName;
   if (email !== undefined) updateUserData.email = email;
   if (phoneNumber !== undefined) updateUserData.phoneNumber = phoneNumber;
-  console.log(password);
-  if (password !== undefined)
-    updateUserData.password = await hashPassword(password);
-  updateUserData.password = await hashPassword(password);
+  if (password !== undefined)    updateUserData.password = await hashPassword(password);
 
   if (req.file) {
     if (req.file.mimetype.startsWith("image/")) {
@@ -229,7 +294,7 @@ const getUserById = async (req, res, next) => {
 
     // Convert uniqueCategories object to an array
     const categories = Object.values(uniqueCategories);
-
+    console.log(categories);
     // Add unique categories to the user object
     user.taskers[0].categories = categories;
 
@@ -241,6 +306,8 @@ const getUserById = async (req, res, next) => {
       .json({ error: "An error occurred while retrieving the user" });
   }
 };
+
+
 
 const getUserByIdTask = async (req, res, next) => {
   const taskId = parseInt(req.params.id);
@@ -363,4 +430,6 @@ module.exports = {
   getTaskerAddresses,
   addTaskerAddress,
   deleteTaskerAddress,
+  getCurrentClient,
+  updateClientProfile
 };
