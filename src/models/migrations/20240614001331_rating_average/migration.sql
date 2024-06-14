@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Task" ALTER COLUMN "ratingAverage" SET DATA TYPE DOUBLE PRECISION;

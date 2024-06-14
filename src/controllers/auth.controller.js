@@ -232,7 +232,6 @@ const registerTasker = async (req, res, next) => {
 
     const taskerInfos = req.body;
 
-    console.log(taskerInfos);
 
     if (req.file) {
       if (req.file.mimetype.startsWith("image/")) {
@@ -258,7 +257,6 @@ const registerTasker = async (req, res, next) => {
 
     for (let index = 0; index < taskerInfos?.addresses?.length; index++) {
       const address = taskerInfos?.addresses[index];
-      console.log(address);
       let addresses = await prisma.address.findMany({
         where: {
           wilaya: address["wilaya"],

@@ -283,12 +283,10 @@ async function createWorkReview(req, res, next) {
       },
     });
     
-    const task = await prisma.task.findUnique({
+    const task = await prisma.task.findFirst({
       where: {
-        categoryId_taskerId: {
           categoryId: existingWork.categoryId,
           taskerId: existingWork.taskerId,
-        },
       },
       select: {
         reviewsCount: true,
@@ -299,12 +297,10 @@ async function createWorkReview(req, res, next) {
     const newReviewsCount = task.reviewsCount + 1;
     const newRatingAverage = ((task.ratingAverage * task.reviewsCount) + parseFloat(rating)) / newReviewsCount;
 
-    await prisma.task.update({
+    await prisma.task.updateMany({
       where: {
-        categoryId_taskerId: {
           categoryId: existingWork.categoryId,
           taskerId: existingWork.taskerId,
-        },
       },
       data: {
         reviewsCount: newReviewsCount,
