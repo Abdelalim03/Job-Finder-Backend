@@ -240,8 +240,7 @@ const getTasks = async (req, res, next) => {
 const getMyTasks = async (req, res, next) => {
   try {
 
-    const {userId } = req.user.id;
-
+    const userId  = req.user.id;
     const tasks = await prisma.task.findMany({
       where: {taskerId : userId},
       include: {
