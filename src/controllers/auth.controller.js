@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const { JWT_EXP, JWT_SECRET } = require("../configs");
 
 const hashPassword = async (password) => {
+  console.log(password);
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
 };
