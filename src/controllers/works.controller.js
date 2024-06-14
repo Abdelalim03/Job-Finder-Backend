@@ -291,6 +291,7 @@ async function createWorkReview(req, res, next) {
       select: {
         reviewsCount: true,
         ratingAverage: true,
+        price:true
       }
     });
 
@@ -305,8 +306,20 @@ async function createWorkReview(req, res, next) {
       data: {
         reviewsCount: newReviewsCount,
         ratingAverage: newRatingAverage,
+
       }
     });
+    await prisma.tasker.update({
+      where: {
+          taskerId: existingWork.taskerId,
+      },
+      data: {
+        amount: {
+          increment:0.9*task.price
+        }
+      }
+    });
+
 
     return res.status(StatusCodes.CREATED).json(newWorkReview);
   } catch (error) {

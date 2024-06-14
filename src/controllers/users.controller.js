@@ -219,7 +219,6 @@ const updateTasker = async (req, res) => {
 
     // If addresses are provided, add them
 
-    console.log(addressesTab);
     if (addressesTab && addressesTab.length > 0) {
       await updateTaskerAddress(userId, addressesTab);
     }
@@ -249,6 +248,7 @@ const getUserById = async (req, res, next) => {
             profilePicture: true,
             userId: true,
             description: true,
+            amount:true,
             Task: {
               select: {
                 id: true,

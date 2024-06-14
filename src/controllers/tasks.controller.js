@@ -278,7 +278,18 @@ const getTaskById = async (req, res, next) => {
       },
       include: {
         taskImages: true,
-        tasker: true,
+        tasker: {
+          select:{
+            profilePicture:true,
+            userId:true,
+            User:{
+              select:{
+                firstName:true,
+                lastName:true
+              }
+            }
+          }
+        },
         category:true,
       },
     });
