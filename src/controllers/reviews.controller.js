@@ -72,6 +72,9 @@ const getReviews = async (req, res, next) => {
         comment: true,
         date:true
       },
+      orderBy:{
+        date:"desc"
+      }
     });
 
     // Process each review to move the profilePicture directly into the user object if they are a tasker
