@@ -29,7 +29,7 @@ model User {
     reviews  Review[]
     Sent     Message[] @relation("Sender")
     Received Message[] @relation("Receiver")
-}
+} 
 
 model Tasker {
     userId         Int     @unique
@@ -65,7 +65,7 @@ model Task {
     description   String
     price         Float
     reviewsCount  Int
-    ratingAverage Int
+    ratingAverage Float
     taskImages    TaskImage[]
 
     taskerId   Int
@@ -148,6 +148,7 @@ model WorkReview {
     workId  Int
     rating  Int
     comment String
+    date    DateTime @default(now())
 }
 
 enum Status {
