@@ -310,7 +310,7 @@ async function createWorkReview(req, res, next) {
     });
     await prisma.tasker.update({
       where: {
-          taskerId: existingWork.taskerId,
+          userId: existingWork.taskerId,
       },
       data: {
         amount: {
